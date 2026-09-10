@@ -1,13 +1,9 @@
 [project]
 name = "k8s-fidelity-lab-inference"
 version = "0.1.0"
-description = "Inference server for the k8s fidelity lab demo workload"
+description = "Inference server for PR #104 GPU batch inference demo"
 requires-python = ">=3.11"
-dependencies = [
-    "torch>=2.0",
-]
+dependencies = []
 
 [tool.uv]
 package = false
-
-[tool.uv.sources]

@@ -1,228 +1,199 @@
 # k8s-fidelity-lab
 
-This project uses a single Kubernetes Operator + Custom Resource Definition (CRD) called **ModelInferencePipeline**. As you push a feature or change through each tier, the change will pass lower levels but reveal subtle real-world failure modes (like root user restrictions or route syntax) as you climb to higher fidelity tiers.
+This project demonstrates **Kubernetes testing fidelity** using a single Pull Request that flows through seven validation tiers. Each tier catches bugs the previous tier cannot see.
+
+## The Change Under Test
+
+**PR #104: feat: Add high-throughput GPU batch inference & metrics sidecar**
+
+What the developer modified:
+
+| Area | Change |
+|------|--------|
+| **CRD API** (`api/v1alpha1/`) | Added `spec.gpuMemoryRequirement` and `spec.sidecarLogging: true` |
+| **Controller** (`controllers/`) | Injects a metrics sidecar container; dynamically scales replicas by GPU tier |
+| **GitOps** (`config/overlays/pr104/`) | Kustomize overlay with RHOAI `InferenceService` annotations |
+| **RHOAI** (`rhoai/`) | KServe `InferenceService` bridge for the sidecar-enabled pipeline |
+| **Sidecar** (`Dockerfile.sidecar`) | New metrics/logging sidecar image |
+
+```
+[PR #104 Submitted]
+       │
+       ├── Tier 1 (envtest) ───► Go logic & CRD schema     → missing +optional on gpuMemoryRequirement
+       ├── Tier 2 (KWOK) ──────► Scale at 500 pods         → reconciler queue starvation
+       ├── Tier 3 (kind) ──────► Sidecar container runtime → SIDECAR_LOG_DIR env var missing
+       ├── Tier 4 (Tilt) ──────► Inner-loop velocity       → hot-reload fix in ~2 seconds
+       ├── Tier 5 (RHOAI) ─────► MLOps integration        → KServe apiVersion v1beta1 conflict
+       ├── Tier 6 (ArgoCD) ────► GitOps sync              → malformed Kustomize patch path
+       └── Tier 7 (OpenShift) ─► Enterprise runtime        → SCC blocks root sidecar on /var/log
+                                                    │
+                                       [100% Production Confidence]
+```
 
 ## Repository Structure
 
 ```
 k8s-fidelity-lab/
-├── README.md                   # Instructions & benchmarking scorecard template
-├── api/v1alpha1/               # CRD definition for ModelInferencePipeline
-│   └── modelpipeline_types.go
-├── controllers/                # Go Operator controller logic
-│   └── modelpipeline_controller.go
+├── api/v1alpha1/               # CRD types (PR #104 fields)
+├── controllers/                # Reconcile loop + sidecar injection
 ├── config/
+│   ├── base/                   # Base ModelInferencePipeline manifest
+│   ├── overlays/pr104/         # GitOps overlay (Tier 6 — intentional Kustomize bug)
 │   ├── crd/                    # Generated CRD manifests
-│   ├── samples/                # Sample CRD instances to apply
-│   └── argocd/                 # ArgoCD Application manifests
-├── Tiltfile                    # Tilt configuration for local live updates
-├── kwok/                       # KWOK cluster & fake node manifests
-├── rhoai/                      # RHOAI / OpenDataHub CRD integration specs
-├── scripts/                    # Helper scripts to run tests & measure resources
-│   ├── measure.sh              # Script using `time` and `ps`/`podman stats`
-│   ├── container.sh            # Podman build + kind image-load helpers
-│   └── tilt-up.sh              # Start Tilt with Podman socket configured
-│   ├── run-envtest.sh
-│   ├── run-kwok.sh
-│   └── run-kind.sh
-└── metrics-log.csv             # Template to log your benchmarking results
+│   ├── samples/                # Per-tier sample CRs
+│   └── argocd/                 # ArgoCD Application for PR #104 overlay
+├── sidecar_entrypoint.sh       # Metrics sidecar (Tier 3 env-var bug)
+├── Dockerfile.sidecar
+├── kwok/                       # Fake nodes for scale testing
+├── rhoai/                      # KServe InferenceService (Tier 5 apiVersion bug)
+├── scripts/                    # Tier runner scripts
+├── Tiltfile                    # Tier 4 hot-reload
+└── metrics-log.csv             # Benchmarking scorecard
 ```
-
-## Demo Workload Scenario
-
-The operator deploys an AI model inference service with **4 intentional edge-case bugs**:
-
-| Bug | Caught At | Description |
-|-----|-----------|-------------|
-| **Schema Bug** | Tier 1 (envtest) | `gpuCount` is `int32` in Go but `type: string` in the CRD OpenAPI schema |
-| **Scale Reconciliation Bug** | Tier 2 (KWOK) | Global reconcile barrier deadlocks under 500+ pipelines |
-| **Container Runtime Bug** | Tier 3 (kind) | Missing `torch` dependency / broken default entrypoint |
-| **OpenShift Security Bug** | Tier 7 (OpenShift) | `runAsRoot: true` violates `restricted-v2` SCC |
 
 ## Prerequisites
 
 - Go 1.22+
-- [Podman](https://podman.io/getting-started/installation) (container builds and kind node provider)
-- [uv](https://docs.astral.sh/uv/) (Python venv for the inference server)
+- [Podman](https://podman.io/getting-started/installation)
+- [uv](https://docs.astral.sh/uv/) (Python venv for local inference server)
 - `kubectl`
-- Optional per tier: [envtest binaries](https://book.kubebuilder.io/reference/envtest), [KWOK](https://kwok.sigs.k8s.io/), [kind](https://kind.sigs.k8s.io/), [Tilt](https://tilt.dev/), [ArgoCD](https://argo-cd.readthedocs.io/), OpenShift CLI (`oc`)
+- Optional per tier: [envtest](https://book.kubebuilder.io/reference/envtest), [KWOK](https://kwok.sigs.k8s.io/), [kind](https://kind.sigs.k8s.io/), [Tilt](https://tilt.dev/), [ArgoCD](https://argo-cd.readthedocs.io/), OpenShift CLI (`oc`)
 
 ```bash
 go mod download
 chmod +x scripts/*.sh kwok/generate-nodes.sh
 
-# Python inference server (local dev with all dependencies, including torch)
 make uv-sync
 source .venv/bin/activate
 python inference_server.py
 ```
 
-On macOS, start the Podman machine before building images:
+On macOS: `podman machine start`
+
+## Step 0: Fork or Branch (preserve the intentional bugs)
+
+**Do this first.** Each tier ends with fixing one deliberate bug from PR #104. If you commit fixes on `main`, you lose the broken baseline.
 
 ```bash
-podman machine start
-```
-
-## Sequential Step-by-Step Execution Plan
-
-### Step 0: Fork or Branch (preserve the intentional bugs)
-
-**Do this first.** Each tier ends with you fixing one of the deliberate bugs. If you apply those fixes on `main`, you lose the broken baseline and cannot re-run the lab later.
-
-Pick one approach and stick with it:
-
-| Approach | When to use |
-|----------|-------------|
-| **Fork** on GitHub/GitLab | Best for workshops or sharing — your fork keeps the upstream repo unchanged |
-| **Local branch** | Best for solo practice — fast to set up, no remote needed |
-
-```bash
-# Option A — Fork on GitHub, then clone your copy
-gh repo fork YOUR_ORG/k8s-fidelity-lab --clone
-cd k8s-fidelity-lab
-
-# Option B — Branch locally; keep main as the frozen broken baseline
-git checkout -b broken-baseline    # snapshot of all intentional bugs (do not commit fixes here)
+# Fork on GitHub, or branch locally:
+git checkout -b broken-baseline    # frozen PR #104 bugs — never commit fixes here
 git checkout -b lab/$(whoami)    # your working branch for tier fixes
-
-# Option C — Tag the starting point so you can always reset
-git tag lab-start
-git checkout -b my-fidelity-run
 ```
 
-**Workflow:** Run each tier and observe the failure on your working branch (`lab/...` or your fork). Commit fixes there only. Leave `main` / `broken-baseline` / `lab-start` untouched so you — or the next person — can clone or `git checkout broken-baseline` and run the full ladder again.
+## Tier-by-Tier Breakdown
 
-### Stage 1: Unit & API Logic (envtest)
+### Tier 1 — envtest (API & Unit Test)
 
-**Run:** `./scripts/run-envtest.sh` or `go test ./controllers/... -v`
+**Run:** `./scripts/run-envtest.sh`
 
-Boots a standalone kube-apiserver and etcd locally without Docker or Kubelets.
+**Testing:** Is `spec.gpuMemoryRequirement` defined correctly in Go and OpenAPI?
 
-| Measure | What to Record |
-|---------|----------------|
-| Time | Seconds to complete tests |
-| Resource | RAM consumed by etcd + kube-apiserver |
-| Confidence | **15–20%** — validates CRD schema and Go controller logic |
+**Passes:** `go test ./controllers/... -v` validates schema and controller logic.
 
-**Fails to catch:** Real Pod containers or image existence.
+**Bug caught:** Missing `// +optional` on `GPUMemoryRequirement` — envtest rejects CRs that omit the GPU field. Controller also nil-pointer panics on unregistered GPU tiers (e.g. `"8Gi"`).
 
-### Stage 2: Controller Scale Testing (KWOK)
+### Tier 2 — KWOK (Scale Simulation)
 
 **Run:** `./scripts/run-kwok.sh`
 
-Creates fake nodes and applies 500 `ModelInferencePipeline` CRs.
+**Testing:** 100 users each create a pipeline with 5 replicas (500 pods total).
 
-| Measure | What to Record |
-|---------|----------------|
-| Time | Cluster spin-up + reconcile of 500 CRs |
-| Resource | RAM of kwok process vs Podman |
-| Confidence | **35–45%** — proves controller won't choke under API load |
+**Passes:** KWOK schedules 500 fake pods across 100 fake nodes in seconds.
 
-**Fails to catch:** Container images are never pulled or executed.
+**Bug caught:** Controller holds a global lock and polls pod statuses sequentially, starving the reconcile worker pool.
 
-### Stage 3: Real Container Runtime (kind)
+### Tier 3 — kind (Real Container Runtime)
 
 **Run:** `./scripts/run-kind.sh`
 
-Runs real Kubelets with Podman as the container runtime (`KIND_EXPERIMENTAL_PROVIDER=podman`).
+**Testing:** Does the metrics sidecar image pull, start, and mount volumes?
 
-| Measure | What to Record |
-|---------|----------------|
-| Time | Image build, load into kind, reach Running state |
-| Resource | Podman CPU/RAM (typically 2–4 GB) |
-| Confidence | **60–70%** — validates image pulls, entrypoints, DNS |
+**Passes:** Kubelet schedules the pod and sets up networking.
 
-**Fails to catch:** OpenShift SCC policies and OpenShift-specific CRDs.
+**Bug caught:** Sidecar `CrashLoopBackOff` — `SIDECAR_LOG_DIR` env var missing from the controller's Pod template.
 
-### Stage 4: Inner-Loop Live Updates (tilt)
+### Tier 4 — Tilt (Inner-Loop Iteration)
 
-**Run:** `./scripts/tilt-up.sh` (after Stage 3 kind cluster is running)
+**Run:** `./scripts/tilt-up.sh` (after Tier 3 kind cluster exists)
 
-Watches local Go code and Containerfiles for live reload via Podman.
+**Testing:** Fix the Tier 3 missing env var without a full cluster rebuild.
 
-| Measure | What to Record |
-|---------|----------------|
-| Time | Ctrl+S → updated logs in Tilt dashboard (aim for < 3 s) |
-| Resource | Tilt file-watcher overhead |
-| Confidence | **65–70%** — same as kind, 10× faster iteration |
+**Passes:** Tilt hot-reloads the controller binary or sidecar script in ~2 seconds after Ctrl+S.
 
-### Stage 5: MLOps Integration (rhoai-in-kind)
+### Tier 5 — rhoai-in-kind (MLOps Platform Integration)
 
 **Run:** `./scripts/run-rhoai-in-kind.sh`
 
-Installs ODH operator dependencies into kind.
+**Testing:** Does the sidecar hook into RHOAI's KServe control plane?
 
-| Measure | What to Record |
-|---------|----------------|
-| Time | Operator initialization (5–10 min) |
-| Resource | Podman memory (8–12 GB typical) |
-| Confidence | **80–85%** — validates MLOps control plane integration |
+**Passes:** Operator creates an `InferenceService` managed by OpenDataHub.
 
-### Stage 6: Declarative Sync & Drift (argocd)
+**Bug caught:** `rhoai/inferenceservice-v1beta1.yaml` uses `serving.kserve.io/v1beta1` — conflicts with the installed RHOAI operator (expects `v1`).
 
-**Run:** Install ArgoCD and apply `config/argocd/application.yaml` (update `repoURL` first).
+### Tier 6 — ArgoCD (GitOps Deployment)
 
-| Measure | What to Record |
-|---------|----------------|
-| Time | Git push → ArgoCD sync |
-| Resource | ArgoCD controller pod (~1 GB RAM) |
-| Confidence | **90%** — proves manifests render cleanly via GitOps |
+**Run:** Install ArgoCD; apply `config/argocd/application.yaml` (update `repoURL`).
 
-### Stage 7: Full Production Environment (OpenShift)
+**Testing:** Can PR #104 deploy declaratively from Git?
+
+**Passes:** ArgoCD syncs the `config/overlays/pr104` path.
+
+**Bug caught:** `config/overlays/pr104/sidecar-patch.yaml` has typo path `/spec/sidecarLoging` — Kustomize build fails with `SyncFailed`.
+
+Verify locally: `kubectl kustomize config/overlays/pr104` (expect error).
+
+### Tier 7 — OpenShift (Production Environment)
 
 **Run:** `oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml`
 
-| Measure | What to Record |
-|---------|----------------|
-| Time | Full CI/CD pipeline (10–30 min) |
-| Resource | Cloud node cost |
-| Confidence | **100%** after fixing `SecurityContext` |
+**Testing:** Sidecar under production SCCs, routes, and real hardware.
 
-**The catch:** OpenShift `restricted-v2` SCC blocks root containers (`runAsUser: 0`). Fix `runAsRoot` in the spec and add a non-root `SecurityContext` in the controller.
+**Bug caught:** Sidecar runs as root (`runAsUser: 0`) and mounts `/var/log` — OpenShift `restricted-v2` SCC blocks pod start (`CreateContainerConfigError`).
+
+**Final fix:** Inject `securityContext.runAsNonRoot: true`, set `SIDECAR_LOG_DIR`, and use an `emptyDir` volume for logs. Re-run Tier 7 for 100% confidence.
 
 ## Local Measurement Scorecard
 
-Log your manual measurements in `metrics-log.csv` or fill in the table below as you execute each step:
+| Tier | Tool | Confidence | Issues Caught |
+|------|------|------------|---------------|
+| 1 | envtest | 20% | Missing +optional; nil pointer on GPU tier |
+| 2 | KWOK | 40% | Reconciler queue starvation at 500 pods |
+| 3 | kind | 65% | Sidecar missing SIDECAR_LOG_DIR |
+| 4 | tilt | 65% | Hot-reload velocity (~2 s) |
+| 5 | rhoai-in-kind | 80% | KServe v1beta1 apiVersion conflict |
+| 6 | argocd | 90% | Malformed Kustomize sidecarLogging patch |
+| 7 | OpenShift | 100% | SCC root UID 0 on /var/log mount |
 
-| Tier | Tool | Setup Time | Change Iteration Time | RAM Usage (MB/GB) | CPU Usage (%) | Confidence Score | Issues Caught at this Level |
-|------|------|------------|----------------------|-------------------|---------------|------------------|----------------------------|
-| 1 | envtest | | | | | 20% | Go syntax, CRD Schema errors |
-| 2 | KWOK | | | | | 40% | Controller deadlock under scale |
-| 3 | kind | | | | | 65% | Missing container binaries, broken DNS |
-| 4 | tilt | | | | | 65% | Velocity metric (Hot-reload speed) |
-| 5 | rhoai-in-kind | | | | | 80% | Missing KServe / MLOps CRD dependencies |
-| 6 | argocd | | | | | 90% | GitOps sync drift, broken Kustomize refs |
-| 7 | OpenShift | | | | | 100% | SCC permission denied, Route ingress errors |
-
-### Measurement Helper
+Log timings in `metrics-log.csv`:
 
 ```bash
 ./scripts/measure.sh "go test ./controllers/... -v"
 ./scripts/measure.sh "./scripts/run-kind.sh"
 ```
 
-## Fixing Each Intentional Bug
+## Fixing Each Intentional Bug (on your working branch only)
 
-Apply these fixes on your **working branch or fork** (see Step 0), not on `main` / `broken-baseline`.
-
-1. **Schema (Tier 1):** Remove `+kubebuilder:validation:Type=string` from `GPUCount` in `api/v1alpha1/modelpipeline_types.go`, regenerate CRD with `make manifests`.
-2. **Scale (Tier 2):** Remove `reconcileBarrier` / `reconcileCond` pattern in `controllers/modelpipeline_controller.go`.
-3. **Runtime (Tier 3):** Add `RUN pip install torch` to `Dockerfile.inference`, or fix the default `command` in the controller. Locally, `make uv-sync` installs torch into `.venv` for testing the fixed server.
-4. **OpenShift (Tier 7):** Set `runAsRoot: false` and use `runAsUser: 1001040000` (or let OpenShift assign via SCC).
+1. **Tier 1:** Add `// +optional` to `GPUMemoryRequirement`; register all GPU tiers in `gpuMemoryScaleFactors`; run `make manifests`.
+2. **Tier 2:** Remove `podStatusPollLock` and sequential `waitForPodStatuses` polling.
+3. **Tier 3:** Set `SIDECAR_LOG_DIR=/var/log/sidecar` in `buildSidecarContainer`.
+4. **Tier 4:** No code fix — measure iteration time with Tilt after Tier 3 fix.
+5. **Tier 5:** Change `apiVersion` to `serving.kserve.io/v1` in `rhoai/inferenceservice-v1beta1.yaml`.
+6. **Tier 6:** Fix patch path to `/spec/sidecarLogging` in `config/overlays/pr104/sidecar-patch.yaml`.
+7. **Tier 7:** Replace `hostPath /var/log` + `runAsUser: 0` with `emptyDir` volume and `runAsNonRoot: true`.
 
 ## Quick Reference
 
 ```bash
-git checkout -b lab/$(whoami)  # Step 0 — preserve broken baseline on main
-make uv-sync           # Python venv (.venv) with torch
-make test              # Tier 1
-./scripts/run-kwok.sh  # Tier 2
-./scripts/run-kind.sh  # Tier 3 (Podman build + kind load)
-./scripts/tilt-up.sh   # Tier 4
-./scripts/run-rhoai-in-kind.sh  # Tier 5
-kubectl apply -f config/argocd/ # Tier 6
+git checkout -b lab/$(whoami)          # Step 0
+make test                              # Tier 1
+./scripts/run-kwok.sh                  # Tier 2 (100 × 5 = 500 pods)
+./scripts/run-kind.sh                  # Tier 3
+./scripts/tilt-up.sh                   # Tier 4
+./scripts/run-rhoai-in-kind.sh         # Tier 5
+kubectl apply -f config/argocd/        # Tier 6
 oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml  # Tier 7
 
-make podman-build              # Build operator image
-make podman-build-inference    # Build inference server image
+make podman-build                      # Operator image
+make podman-build-inference            # Inference server image
+make podman-build-sidecar              # Metrics sidecar image
 ```

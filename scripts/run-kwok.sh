@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Tier 2: KWOK scale testing with 500 ModelInferencePipeline CRs.
+# Tier 2: KWOK scale testing — 100 pipelines × 5 replicas = 500 pods (PR #104).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTER_NAME="${KWOK_CLUSTER_NAME:-fidelity-kwok}"
-PIPELINE_COUNT="${PIPELINE_COUNT:-500}"
+PIPELINE_COUNT="${PIPELINE_COUNT:-100}"
 
-echo "=== Tier 2: KWOK scale test (${PIPELINE_COUNT} pipelines) ==="
+echo "=== Tier 2: KWOK scale test (${PIPELINE_COUNT} pipelines × 5 replicas = $((PIPELINE_COUNT * 5)) pods) ==="
 
 if ! command -v kwokctl &>/dev/null; then
   echo "kwokctl not found. Install: https://kwok.sigs.k8s.io/docs/user/install/"

@@ -22,6 +22,9 @@ spec:
     - jsonPath: .status.readyReplicas
       name: Ready
       type: integer
+    - jsonPath: .spec.gpuMemoryRequirement
+      name: GPU Mem
+      type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -39,11 +42,8 @@ spec:
           spec:
             description: ModelInferencePipelineSpec defines the desired state.
             properties:
-              command:
-                items:
-                  type: string
-                type: array
-              gpuCount:
+              gpuMemoryRequirement:
+                minLength: 1
                 type: string
               image:
                 type: string
@@ -55,9 +55,12 @@ spec:
                 maximum: 1000
                 minimum: 0
                 type: integer
-              runAsRoot:
+              sidecarImage:
+                type: string
+              sidecarLogging:
                 type: boolean
             required:
+            - gpuMemoryRequirement
             - image
             - modelName
             type: object

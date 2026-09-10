@@ -1,0 +1,21 @@
+# PR #104 KServe bridge — INTENTIONAL TIER 5 BUG:
+# apiVersion serving.kserve.io/v1beta1 conflicts with installed RHOAI operator (expects v1).
+# Fix: change to serving.kserve.io/v1
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: pr104-sklearn-iris
+  namespace: opendatahub
+  labels:
+    app.kubernetes.io/part-of: opendatahub
+    fidelity.ai/pr: "104"
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: sklearn
+      storageUri: "s3://models/sklearn-iris"
+      resources:
+        requests:
+          memory: "16Gi"
+          cpu: "1"

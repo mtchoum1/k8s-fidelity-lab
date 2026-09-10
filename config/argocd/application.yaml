@@ -1,17 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: fidelity-lab
+  name: fidelity-lab-pr104
   namespace: argocd
+  labels:
+    fidelity.ai/pr: "104"
 spec:
   project: default
   source:
     repoURL: https://github.com/YOUR_ORG/k8s-fidelity-lab.git
     targetRevision: main
-    path: config
-    directory:
-      recurse: true
-      include: "{crd/bases/*,operator/*,samples/modelpipeline_v1alpha1_basic.yaml}"
+    path: config/overlays/pr104
   destination:
     server: https://kubernetes.default.svc
     namespace: default

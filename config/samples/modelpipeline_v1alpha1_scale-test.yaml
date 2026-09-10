@@ -1,12 +1,13 @@
-# Tier 2 (KWOK): Apply 500 instances of this template to trigger scale reconciliation bug.
-# Usage: for i in $(seq 1 500); do sed "s/PIPELINE_NAME/scale-test-$i/" config/samples/modelpipeline_v1alpha1_scale-test.yaml | kubectl apply -f -; done
+# Tier 2 (KWOK): 100 users × 5 replicas = 500 pods — triggers reconcile queue starvation.
+# Usage: for i in $(seq 1 100); do sed "s/PIPELINE_NAME/scale-test-$i/" config/samples/modelpipeline_v1alpha1_scale-test.yaml | kubectl apply -f -; done
 apiVersion: fidelity.ai/v1alpha1
 kind: ModelInferencePipeline
 metadata:
   name: PIPELINE_NAME
   namespace: default
 spec:
-  modelName: scale-test-model
-  replicas: 1
+  modelName: gpu-batch-scale-test
+  replicas: 5
   image: ghcr.io/k8s-fidelity-lab/inference-server:latest
-  gpuCount: "0"
+  gpuMemoryRequirement: "16Gi"
+  sidecarLogging: true

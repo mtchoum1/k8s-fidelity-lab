@@ -1,8 +1,8 @@
-Tier,Tool,Setup Time (s),Change Iteration Time (s),RAM Usage (MB/GB),CPU Usage (%),Confidence Score (%),Issues Caught,Issues Found,Notes
-1,envtest,,,,,20,"Go syntax, CRD Schema errors",,
-2,KWOK,,,,,40,"Controller deadlock under scale",,
-3,kind,,,,,65,"Missing container binaries, broken DNS",,
-4,tilt,,,,,65,"Velocity metric (Hot-reload speed)",,
-5,rhoai-in-kind,,,,,80,"Missing KServe / MLOps CRD dependencies",,
-6,argocd,,,,,90,"GitOps sync drift, broken Kustomize refs",,
-7,OpenShift,,,,,100,"SCC permission denied, Route ingress errors",,
+Tier,Tool,PR,Setup Time (s),Change Iteration Time (s),RAM Usage (MB/GB),CPU Usage (%),Confidence Score (%),Issues Caught,Bug Found,Notes
+1,envtest,#104,,,,,20,"Go logic, CRD schema","Missing +optional on gpuMemoryRequirement; nil pointer on unknown GPU tier",
+2,KWOK,#104,,,,,40,"Controller scale at 500 pods","Reconciler queue starvation (sequential pod status polling)",100 pipelines × 5 replicas
+3,kind,#104,,,,,65,"Sidecar container runtime","SIDECAR_LOG_DIR env var missing from Pod template",
+4,tilt,#104,,,,,65,"Inner-loop velocity","Hot-reload sidecar/controller fix in <3s",
+5,rhoai-in-kind,#104,,,,,80,"KServe / RHOAI integration","InferenceService apiVersion v1beta1 conflict",
+6,argocd,#104,,,,,90,"GitOps Kustomize sync","Malformed sidecarLogging patch path in overlay",
+7,OpenShift,#104,,,,,100,"Enterprise SCC + routes","Sidecar runs as root UID 0 writing to /var/log",

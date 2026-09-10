@@ -1,9 +1,12 @@
-# Alias for PR #104 sample — see modelpipeline_v1alpha1_pr104.yaml
+# PR #104: high-throughput GPU batch inference & metrics sidecar
 apiVersion: fidelity.ai/v1alpha1
 kind: ModelInferencePipeline
 metadata:
   name: pr104-gpu-batch-pipeline
   namespace: default
+  labels:
+    app.kubernetes.io/part-of: fidelity-lab
+    fidelity.ai/pr: "104"
 spec:
   modelName: sklearn-iris
   replicas: 1

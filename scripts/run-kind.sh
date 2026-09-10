@@ -6,6 +6,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
+SIDECAR_IMG="ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest"
 
 # shellcheck source=scripts/container.sh
 source "$ROOT/scripts/container.sh"
@@ -28,10 +29,13 @@ kind_load_image "$OPERATOR_IMG" "$CLUSTER_NAME"
 container_build -t "$INFERENCE_IMG" -f "$ROOT/Dockerfile.inference" "$ROOT"
 kind_load_image "$INFERENCE_IMG" "$CLUSTER_NAME"
 
+container_build -t "$SIDECAR_IMG" -f "$ROOT/Dockerfile.sidecar" "$ROOT"
+kind_load_image "$SIDECAR_IMG" "$CLUSTER_NAME"
+
 kubectl apply -f "$ROOT/config/crd/bases/"
 kubectl apply -f "$ROOT/config/operator/"
 
-echo "Applying broken runtime sample (expect CrashLoopBackOff)..."
+echo "Applying PR #104 sample with broken sidecar env (expect CrashLoopBackOff)..."
 kubectl apply -f "$ROOT/config/samples/modelpipeline_v1alpha1_kind-broken.yaml"
 
 echo "Check pod status:"

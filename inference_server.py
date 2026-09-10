@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""Minimal inference server for the fidelity lab demo workload."""
+"""Minimal inference server for PR #104 GPU batch inference demo."""
 
 import http.server
 import json
 import sys
-
-# INTENTIONAL: torch is not installed in Dockerfile.inference
-import torch  # noqa: F401 — fails at runtime on kind (Tier 3)
 
 PORT = 8080
 
@@ -27,9 +24,11 @@ class InferenceHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps({"prediction": "iris-setosa", "input": body.decode()}).encode())
+        self.wfile.write(
+            json.dumps({"prediction": "iris-setosa", "batch": True, "input": body.decode()}).encode()
+        )
 
 
 if __name__ == "__main__":
-    print(f"Starting inference server on :{PORT}", file=sys.stderr)
+    print(f"Starting PR #104 inference server on :{PORT}", file=sys.stderr)
     http.server.HTTPServer(("0.0.0.0", PORT), InferenceHandler).serve_forever()

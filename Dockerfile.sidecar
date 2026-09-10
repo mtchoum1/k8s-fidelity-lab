@@ -1,0 +1,7 @@
+# PR #104: metrics/logging sidecar image
+FROM python:3.11-slim
+WORKDIR /app
+COPY sidecar_entrypoint.sh /usr/local/bin/sidecar-entrypoint.sh
+RUN chmod +x /usr/local/bin/sidecar-entrypoint.sh
+EXPOSE 9090
+CMD ["/usr/local/bin/sidecar-entrypoint.sh"]

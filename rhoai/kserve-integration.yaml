@@ -1,4 +1,4 @@
-# Links ModelInferencePipeline to KServe InferenceService expectations.
+# Links PR #104 ModelInferencePipeline to the KServe InferenceService managed by RHOAI.
 apiVersion: fidelity.ai/v1alpha1
 kind: ModelInferencePipeline
 metadata:
@@ -6,12 +6,12 @@ metadata:
   namespace: opendatahub
   labels:
     app.kubernetes.io/part-of: opendatahub
-    serving.kserve.io/inferenceservice: sklearn-iris
+    serving.kserve.io/inferenceservice: pr104-sklearn-iris
+    fidelity.ai/pr: "104"
 spec:
-  modelName: sklearn-iris
+  modelName: pr104-sklearn-iris
   replicas: 1
   image: ghcr.io/k8s-fidelity-lab/inference-server:latest
-  gpuCount: "0"
-  command:
-    - python
-    - inference_server.py
+  gpuMemoryRequirement: "16Gi"
+  sidecarLogging: true
+  sidecarImage: ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest

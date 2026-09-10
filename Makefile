@@ -1,6 +1,7 @@
 # Image URL to use all building/pushing image targets
 IMG ?= ghcr.io/k8s-fidelity-lab/operator:latest
 INFERENCE_IMG ?= ghcr.io/k8s-fidelity-lab/inference-server:latest
+SIDECAR_IMG ?= ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest
 
 .PHONY: all
 all: build
@@ -37,6 +38,10 @@ podman-build:
 .PHONY: podman-build-inference
 podman-build-inference:
 	podman build -t ${INFERENCE_IMG} -f Dockerfile.inference .
+
+.PHONY: podman-build-sidecar
+podman-build-sidecar:
+	podman build -t ${SIDECAR_IMG} -f Dockerfile.sidecar .
 
 .PHONY: manifests
 manifests:
