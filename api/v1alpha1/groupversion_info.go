@@ -1,4 +1,7 @@
 // Package v1alpha1 contains API Schema definitions for the fidelity lab operator.
+//
+// +kubebuilder:object:generate=true
+// +groupName=fidelity.ai
 package v1alpha1
 
 import (

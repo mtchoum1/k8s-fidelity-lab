@@ -90,11 +90,14 @@ Both `// +optional` **and** `,omitempty` on the JSON tag are required. The marke
 make manifests
 ```
 
-Verify `gpuMemoryRequirement` is **not** under `required:`:
+Verify `gpuMemoryRequirement` is **not** under `required:` in the **correct** file:
 
 ```bash
 grep -A5 'required:' config/crd/bases/fidelity.ai_modelinferencepipelines.yaml
+# expect: image, modelName, replicas — NOT gpuMemoryRequirement
 ```
+
+If the field is still listed, check you are not looking at a stale file. `make manifests` updates `fidelity.ai_modelinferencepipelines.yaml` only — delete any stray `config/crd/bases/_modelinferencepipelines.yaml` if it appears (that means `+groupName` was missing from `api/v1alpha1/groupversion_info.go`).
 
 **Step 3 — Fix nil-pointer in replica scaling** (`controllers/modelpipeline_controller.go`):
 
@@ -116,12 +119,23 @@ if scale == nil {
 return base * scale.Multiplier
 ```
 
-**Step 4 — Update tests** (`controllers/modelpipeline_controller_test.go`):
+**Step 4 — Update tests** (`controllers/modelpipeline_controller_test.go`) — **required, easy to miss**:
+
+After Steps 1–3, the old tests still expect the *broken* behavior and will fail. You must invert them:
 
 | Test | Change from | Change to |
 |------|-------------|-----------|
 | Missing `gpuMemoryRequirement` | `Expect(err).To(HaveOccurred())` | `Expect(err).NotTo(HaveOccurred())` |
 | `gpuMemoryRequirement: "8Gi"` | `Expect(...).To(Panic())` | `Expect(...).NotTo(Panic())` |
+
+If you skip this step you will see:
+
+```
+Expected an error to have occurred.  Got: <nil>
+Expected func() to panic
+```
+
+That means your **fix worked** — the tests just need updating.
 
 **Verify:** `./lab run 1` — expect 3 specs PASS.
 
@@ -131,6 +145,7 @@ return base * scale.Multiplier
 |-------|-------|
 | `make manifests` fails | Use `make manifests` (not `make manifest`); Makefile auto-installs `controller-gen` |
 | CRD still requires field | Missing `,omitempty` — re-run `make manifests` |
+| `grep` still shows `gpuMemoryRequirement` required | Wrong CRD file, or `_modelinferencepipelines.yaml` created — fix `+groupName` in `groupversion_info.go`, delete stray file, re-run `make manifests` |
 | `Expected an error to have occurred` | CRD fixed but test not updated (Step 4) |
 | Tests pass but cluster rejects CR | CRD not applied: `kubectl apply -f config/crd/bases/` |
 

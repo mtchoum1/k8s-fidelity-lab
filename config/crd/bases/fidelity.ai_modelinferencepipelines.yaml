@@ -1,8 +1,9 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    controller-gen.kubebuilder.io/version: v0.22.0
   name: modelinferencepipelines.fidelity.ai
 spec:
   group: fidelity.ai
@@ -31,38 +32,63 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ModelInferencePipeline is the Schema for the modelinferencepipelines API.
         properties:
           apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
           spec:
-            description: ModelInferencePipelineSpec defines the desired state.
+            description: |-
+              ModelInferencePipelineSpec defines the desired state of a model inference pipeline.
+              PR #104: feat: Add high-throughput GPU batch inference & metrics sidecar
             properties:
               gpuMemoryRequirement:
+                description: |-
+                  GPUMemoryRequirement is the GPU memory allocation per replica (e.g. "16Gi").
+                  PR #104 field — INTENTIONAL TIER 1 BUG: missing // +optional marker.
+                  CRD admission rejects CRs that omit this field. Fix: add // +optional.
                 minLength: 1
                 type: string
               image:
+                description: Image is the container image for the inference server.
                 type: string
               modelName:
+                description: ModelName is the KServe / ODH model identifier.
                 minLength: 1
                 type: string
               replicas:
+                description: |-
+                  Replicas is the base number of inference pods to run.
+                  The controller scales this dynamically when gpuMemoryRequirement is set.
                 format: int32
                 maximum: 1000
                 minimum: 0
                 type: integer
               sidecarImage:
+                description: SidecarImage overrides the default metrics sidecar image.
                 type: string
               sidecarLogging:
+                description: SidecarLogging enables the metrics/logging sidecar injected
+                  by the controller.
                 type: boolean
             required:
             - gpuMemoryRequirement
             - image
             - modelName
+            - replicas
             type: object
           status:
             description: ModelInferencePipelineStatus defines the observed state.
@@ -78,6 +104,8 @@ spec:
                 format: int32
                 type: integer
             type: object
+        required:
+        - spec
         type: object
     served: true
     storage: true
