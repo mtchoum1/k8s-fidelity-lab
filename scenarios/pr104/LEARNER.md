@@ -3,19 +3,41 @@
 **Scenario:** feat: Add high-throughput GPU batch inference & metrics sidecar  
 **Goal:** Push one change through seven fidelity tiers and record what each tier catches.
 
+## What Changed in PR #104
+
+| Area | Change |
+|------|--------|
+| **CRD API** (`api/v1alpha1/`) | Added `spec.gpuMemoryRequirement` and `spec.sidecarLogging: true` |
+| **Controller** (`controllers/`) | Injects a metrics sidecar; dynamically scales replicas by GPU tier |
+| **GitOps** (`config/overlays/pr104/`) | Kustomize overlay with RHOAI `InferenceService` annotations |
+| **RHOAI** (`rhoai/`) | KServe `InferenceService` bridge |
+| **Sidecar** (`Dockerfile.sidecar`) | New metrics/logging sidecar image |
+
+```
+[PR #104 Submitted]
+       │
+       ├── Tier 1 (envtest) ───► missing +optional on gpuMemoryRequirement
+       ├── Tier 2 (KWOK) ──────► reconciler queue starvation at 500 pods
+       ├── Tier 3 (kind) ──────► SIDECAR_LOG_DIR env var missing
+       ├── Tier 4 (Tilt) ──────► hot-reload fix in ~2 seconds
+       ├── Tier 5 (RHOAI) ─────► KServe apiVersion v1beta1 conflict
+       ├── Tier 6 (ArgoCD) ────► malformed Kustomize patch path
+       └── Tier 7 (OpenShift) ─► SCC blocks root sidecar on /var/log
+```
+
 ## Before You Start
 
 ```bash
-git checkout -b lab/$(whoami)    # never fix bugs on main
+git checkout -b lab/$(whoami) lab-v1.0-pr104
 ./lab verify                     # confirm baseline bugs are present
 ./lab status
 ```
 
-Keep `main` (or tag `lab-v1.0-pr104`) frozen. Commit fixes only on your `lab/*` branch.
+Keep `main` / `lab-v1.0-pr104` frozen. Commit fixes only on your `lab/*` branch.
+
+> After applying fixes, `./lab verify` will fail — that is expected. Use `./lab run <tier>` to validate.
 
 ## Scorecard
-
-Copy this table into `metrics-log.csv` or your notes as you complete each tier.
 
 | Tier | Tool | Setup Time | Iteration Time | RAM | CPU % | What failed? | What you fixed |
 |------|------|------------|----------------|-----|-------|--------------|----------------|
@@ -33,7 +55,6 @@ Copy this table into `metrics-log.csv` or your notes as you complete each tier.
 
 ```bash
 ./lab run 1
-# hint only:
 ./lab hint 1
 ```
 
@@ -43,9 +64,75 @@ Copy this table into `metrics-log.csv` or your notes as you complete each tier.
 - [ ] Which test passes? Which test documents the schema rejection?
 - [ ] What happens when `gpuMemoryRequirement` is `"8Gi"` (not in the scale map)?
 
-**Fix (on your branch):** Add `// +optional` to `GPUMemoryRequirement` in `api/v1alpha1/modelpipeline_types.go` and register missing GPU tiers in `gpuMemoryScaleFactors`. Regenerate CRD: `make manifests`.
+### Symptoms
 
-**Re-run:** `./lab run 1`
+- CRs without `gpuMemoryRequirement` are rejected at admission
+- Controller panics on unknown GPU tiers (e.g. `"8Gi"`)
+
+### Fix steps
+
+**Files:** `api/v1alpha1/modelpipeline_types.go`, `controllers/modelpipeline_controller.go`, `controllers/modelpipeline_controller_test.go`, `config/crd/bases/` (via `make manifests`)
+
+**Step 1 — Fix the Go type** (`api/v1alpha1/modelpipeline_types.go`):
+
+```go
+// GPUMemoryRequirement is the GPU memory allocation per replica (e.g. "16Gi").
+// +optional
+// +kubebuilder:validation:MinLength=1
+GPUMemoryRequirement string `json:"gpuMemoryRequirement,omitempty"`
+```
+
+Both `// +optional` **and** `,omitempty` on the JSON tag are required. The marker alone does not update the CRD.
+
+**Step 2 — Regenerate the CRD:**
+
+```bash
+make manifests
+```
+
+Verify `gpuMemoryRequirement` is **not** under `required:`:
+
+```bash
+grep -A5 'required:' config/crd/bases/fidelity.ai_modelinferencepipelines.yaml
+```
+
+**Step 3 — Fix nil-pointer in replica scaling** (`controllers/modelpipeline_controller.go`):
+
+```go
+var gpuMemoryScaleFactors = map[string]*gpuScaleFactor{
+    "8Gi":  {Multiplier: 1},
+    "16Gi": {Multiplier: 2},
+    "32Gi": {Multiplier: 4},
+}
+```
+
+Or guard in `computeReplicas`:
+
+```go
+scale := gpuMemoryScaleFactors[pipeline.Spec.GPUMemoryRequirement]
+if scale == nil {
+    return base
+}
+return base * scale.Multiplier
+```
+
+**Step 4 — Update tests** (`controllers/modelpipeline_controller_test.go`):
+
+| Test | Change from | Change to |
+|------|-------------|-----------|
+| Missing `gpuMemoryRequirement` | `Expect(err).To(HaveOccurred())` | `Expect(err).NotTo(HaveOccurred())` |
+| `gpuMemoryRequirement: "8Gi"` | `Expect(...).To(Panic())` | `Expect(...).NotTo(Panic())` |
+
+**Verify:** `./lab run 1` — expect 3 specs PASS.
+
+### Common mistakes
+
+| Error | Cause |
+|-------|-------|
+| `make manifests` fails | Use `make manifests` (not `make manifest`); Makefile auto-installs `controller-gen` |
+| CRD still requires field | Missing `,omitempty` — re-run `make manifests` |
+| `Expected an error to have occurred` | CRD fixed but test not updated (Step 4) |
+| Tests pass but cluster rejects CR | CRD not applied: `kubectl apply -f config/crd/bases/` |
 
 ---
 
@@ -60,9 +147,39 @@ Copy this table into `metrics-log.csv` or your notes as you complete each tier.
 
 **Observe:**
 - [ ] How long until reconcile stalls?
-- [ ] What do operator logs show (`kubectl -n fidelity-lab-system logs -l app=fidelity-lab-operator`)?
+- [ ] Operator logs: `kubectl -n fidelity-lab-system logs -l app=fidelity-lab-operator`
 
-**Fix:** Remove `podStatusPollLock` and sequential `waitForPodStatuses` in `controllers/modelpipeline_controller.go`.
+### Symptoms
+
+- Operator logs: `waiting on pod status updates`
+- Pipelines never reach `Running` at scale
+
+### Fix steps
+
+**File:** `controllers/modelpipeline_controller.go`
+
+**Step 1 — Remove the global poll lock:**
+
+```go
+var podStatusPollLock sync.Mutex   // delete this
+```
+
+**Step 2 — Remove the blocking call from `Reconcile`:**
+
+```go
+if err := r.waitForPodStatuses(ctx, pipeline, deployName); err != nil {
+    ...
+}
+```
+
+**Step 3 — Delete `waitForPodStatuses`** (or replace with non-blocking status update).
+
+**Verify:**
+
+```bash
+PIPELINE_COUNT=20 ./scripts/run-kwok.sh   # short demo
+./lab run 2                               # full 100 × 5 load
+```
 
 ---
 
@@ -77,10 +194,46 @@ podman machine start   # macOS
 **What you're testing:** Sidecar container pulls, starts, and mounts volumes.
 
 **Observe:**
-- [ ] `kubectl get pods` — which container is in `CrashLoopBackOff`?
-- [ ] `kubectl logs <pod> -c metrics-sidecar` — what error?
+- [ ] `kubectl get pods` — which container is `CrashLoopBackOff`?
+- [ ] `kubectl logs <pod> -c metrics-sidecar`
 
-**Fix:** Set `SIDECAR_LOG_DIR` env var in `buildSidecarContainer`.
+### Symptoms
+
+```
+error: SIDECAR_LOG_DIR environment variable is required
+```
+
+### Fix steps
+
+**File:** `controllers/modelpipeline_controller.go` → `buildSidecarContainer`
+
+**Step 1 — Add the env var:**
+
+```go
+return corev1.Container{
+    Name:    "metrics-sidecar",
+    Image:   image,
+    Command: []string{"/usr/local/bin/sidecar-entrypoint.sh"},
+    Env: []corev1.EnvVar{
+        {Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"},
+    },
+    // SecurityContext and volume unchanged until Tier 7
+    ...
+}
+```
+
+**Step 2 — Rebuild and reload:**
+
+```bash
+./lab run 3
+```
+
+**Verify:**
+
+```bash
+kubectl logs <pod-name> -c metrics-sidecar
+# expect: "sidecar starting; writing metrics to ..."
+```
 
 ---
 
@@ -95,9 +248,17 @@ podman machine start   # macOS
 
 **Observe:**
 - [ ] Seconds from Ctrl+S to healthy sidecar in Tilt UI?
-- [ ] How does that compare to a full `./lab run 3` rebuild?
+- [ ] Compare to a full `./lab run 3` rebuild
 
-**Fix:** No new bug — measure iteration speed after Tier 3 fix.
+### Fix steps
+
+No new bug. Apply the Tier 3 fix, then:
+
+```bash
+./scripts/tilt-up.sh
+```
+
+Save `controllers/modelpipeline_controller.go` and record hot-reload time in your scorecard (target: < 3 seconds).
 
 ---
 
@@ -114,7 +275,34 @@ podman machine start   # macOS
 - [ ] Does `InferenceService` apply succeed?
 - [ ] What apiVersion error appears?
 
-**Fix:** Change `serving.kserve.io/v1beta1` → `serving.kserve.io/v1` in `rhoai/inferenceservice-v1beta1.yaml`.
+### Symptoms
+
+```
+no matches for kind "InferenceService" in version "serving.kserve.io/v1beta1"
+```
+
+### Fix steps
+
+**File:** `rhoai/inferenceservice-v1beta1.yaml`
+
+**Step 1 — Update apiVersion:**
+
+```yaml
+apiVersion: serving.kserve.io/v1   # was: v1beta1
+kind: InferenceService
+```
+
+**Step 2 — Re-apply:**
+
+```bash
+kubectl apply -k rhoai/
+```
+
+**Verify:**
+
+```bash
+kubectl get inferenceservice -n opendatahub
+```
 
 ---
 
@@ -128,10 +316,34 @@ podman machine start   # macOS
 **What you're testing:** Declarative deploy from `config/overlays/pr104`.
 
 **Observe:**
-- [ ] Does `kubectl kustomize config/overlays/pr104` succeed on baseline? (It should **fail**.)
-- [ ] After installing ArgoCD, what sync error appears?
+- [ ] `kubectl kustomize config/overlays/pr104` — should **fail** on baseline
+- [ ] ArgoCD sync error after install
 
-**Fix:** Correct patch path `/spec/sidecarLoging` → `/spec/sidecarLogging` in `config/overlays/pr104/sidecar-patch.yaml`.
+### Symptoms
+
+```
+error: unable to find patch path /spec/sidecarLoging
+```
+
+### Fix steps
+
+**File:** `config/overlays/pr104/sidecar-patch.yaml`
+
+**Step 1 — Fix the typo:**
+
+```yaml
+- op: replace
+  path: /spec/sidecarLogging    # was: /spec/sidecarLoging
+  value: true
+```
+
+**Verify:**
+
+```bash
+kubectl kustomize config/overlays/pr104   # should succeed
+```
+
+Install ArgoCD and apply `config/argocd/application.yaml` (update `repoURL`).
 
 ---
 
@@ -145,19 +357,65 @@ podman machine start   # macOS
 **What you're testing:** Production SCCs, routes, and real hardware.
 
 **Observe:**
-- [ ] Pod events: `oc describe pod <name>`
-- [ ] SCC denial message for root + `/var/log` mount?
+- [ ] `oc describe pod <name>` — SCC denial events?
+- [ ] `CreateContainerConfigError` for root + `/var/log` mount?
 
-**Fix:** `runAsNonRoot: true`, `emptyDir` for logs, non-root `SIDECAR_LOG_DIR`.
+### Symptoms
+
+```
+unable to validate against any security context constraint
+```
+
+### Fix steps
+
+**File:** `controllers/modelpipeline_controller.go`
+
+**Step 1 — Replace root security context** in `buildSidecarContainer`:
+
+```go
+SecurityContext: &corev1.SecurityContext{
+    RunAsNonRoot: boolPtr(true),
+    RunAsUser:    int64Ptr(1001040000),
+},
+```
+
+**Step 2 — Replace `hostPath` with `emptyDir`** in `buildDeployment`:
+
+```go
+volumes = append(volumes, corev1.Volume{
+    Name: "sidecar-logs",
+    VolumeSource: corev1.VolumeSource{
+        EmptyDir: &corev1.EmptyDirVolumeSource{},
+    },
+})
+```
+
+**Step 3 — Align env var and mount** (with Tier 3 fix):
+
+```go
+Env: []corev1.EnvVar{
+    {Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"},
+},
+VolumeMounts: []corev1.VolumeMount{
+    {Name: "sidecar-logs", MountPath: "/var/log/sidecar"},
+},
+```
+
+**Verify:**
+
+```bash
+oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml
+oc get pods -w
+```
 
 ---
 
 ## Reset for Another Run
 
 ```bash
-./lab reset      # restore broken baseline from main
+./lab reset
 ./lab verify
-git checkout -b lab/$(whoami)-run2
+git checkout -b lab/$(whoami)-run2 lab-v1.0-pr104
 ```
 
 ## Reflection Questions

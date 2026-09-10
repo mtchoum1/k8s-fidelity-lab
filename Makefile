@@ -43,13 +43,16 @@ podman-build-inference:
 podman-build-sidecar:
 	podman build -t ${SIDECAR_IMG} -f Dockerfile.sidecar .
 
+CONTROLLER_GEN ?= $(shell go env GOPATH)/bin/controller-gen
+CONTROLLER_GEN_VERSION ?= v0.15.0
+
 .PHONY: manifests
 manifests:
-	@command -v controller-gen >/dev/null 2>&1 || { \
-		echo "Install controller-gen: go install sigs.k8s.io/controller-tools/cmd/controller-gen@latest"; \
-		exit 1; \
+	@test -x "$(CONTROLLER_GEN)" || { \
+		echo "Installing controller-gen $(CONTROLLER_GEN_VERSION) to $(CONTROLLER_GEN)..."; \
+		go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION); \
 	}
-	controller-gen crd paths="./..." output:crd:artifacts:config=config/crd/bases
+	"$(CONTROLLER_GEN)" crd paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: install
 install:
