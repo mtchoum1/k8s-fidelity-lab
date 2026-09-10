@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# k8s-fidelity-lab CLI — run tiers, verify baseline, reset scenario.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lab-lib.sh
+source "$ROOT/scripts/lab-lib.sh"
+
+CMD="${1:-}"
+ARG="${2:-}"
+
+case "$CMD" in
+  run)
+    [[ -n "$ARG" ]] || { lab_usage; exit 1; }
+    if ./scripts/lab-verify.sh --quiet 2>/dev/null; then
+      :
+    else
+      echo "warning: baseline may be modified — fixes from a prior run detected." >&2
+      echo "         Continue anyway, or run: ./lab reset" >&2
+    fi
+    if lab_run_tier "$ARG"; then
+      lab_log_run "$ARG" "ok"
+    else
+      lab_log_run "$ARG" "fail"
+      exit 1
+    fi
+    ;;
+  verify)
+    ./scripts/lab-verify.sh
+    ;;
+  reset)
+    ./scripts/lab-reset.sh
+    ;;
+  status)
+    lab_status
+    ;;
+  hint)
+    [[ -n "$ARG" ]] || { lab_usage; exit 1; }
+    lab_hint "$ARG"
+    ;;
+  ""|help|-h|--help)
+    lab_usage
+    ;;
+  *)
+    echo "Unknown command: ${CMD}" >&2
+    lab_usage
+    exit 1
+    ;;
+esac

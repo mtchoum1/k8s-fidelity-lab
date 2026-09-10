@@ -46,7 +46,9 @@ k8s-fidelity-lab/
 ├── Dockerfile.sidecar
 ├── kwok/                       # Fake nodes for scale testing
 ├── rhoai/                      # KServe InferenceService (Tier 5 apiVersion bug)
-├── scripts/                    # Tier runner scripts
+├── scenarios/pr104/            # LEARNER.md + FACILITATOR.md worksheets
+├── lab                         # CLI: run, verify, reset, status, hint
+├── scripts/                    # Tier runner + lab-verify/lab-reset
 ├── Tiltfile                    # Tier 4 hot-reload
 └── metrics-log.csv             # Benchmarking scorecard
 ```
@@ -70,6 +72,27 @@ python inference_server.py
 
 On macOS: `podman machine start`
 
+## Lab CLI
+
+```bash
+chmod +x lab scripts/*.sh kwok/generate-nodes.sh
+
+./lab verify              # confirm intentional bugs are present (run on main)
+./lab status              # scenario + integrity + recent runs
+./lab run 1               # run tier 1 (envtest)
+./lab run 3               # run tier 3 (kind)
+./lab hint 3              # symptom only, no fix spoiler
+./lab reset               # restore broken baseline from main
+
+make lab-verify           # same as ./lab verify
+make lab-reset            # same as ./lab reset
+make lab-run TIER=1       # same as ./lab run 1
+```
+
+**Worksheets:** [Learner guide](scenarios/pr104/LEARNER.md) | [Facilitator guide](scenarios/pr104/FACILITATOR.md)
+
+Tag the frozen baseline for cohorts: `git tag lab-v1.0-pr104`
+
 ## Step 0: Fork or Branch (preserve the intentional bugs)
 
 **Do this first.** Each tier ends with fixing one deliberate bug from PR #104. If you commit fixes on `main`, you lose the broken baseline.
@@ -84,7 +107,7 @@ git checkout -b lab/$(whoami)    # your working branch for tier fixes
 
 ### Tier 1 — envtest (API & Unit Test)
 
-**Run:** `./scripts/run-envtest.sh`
+**Run:** `./lab run 1`
 
 **Testing:** Is `spec.gpuMemoryRequirement` defined correctly in Go and OpenAPI?
 
@@ -94,7 +117,7 @@ git checkout -b lab/$(whoami)    # your working branch for tier fixes
 
 ### Tier 2 — KWOK (Scale Simulation)
 
-**Run:** `./scripts/run-kwok.sh`
+**Run:** `./lab run 2`
 
 **Testing:** 100 users each create a pipeline with 5 replicas (500 pods total).
 
@@ -104,7 +127,7 @@ git checkout -b lab/$(whoami)    # your working branch for tier fixes
 
 ### Tier 3 — kind (Real Container Runtime)
 
-**Run:** `./scripts/run-kind.sh`
+**Run:** `./lab run 3`
 
 **Testing:** Does the metrics sidecar image pull, start, and mount volumes?
 
@@ -114,7 +137,7 @@ git checkout -b lab/$(whoami)    # your working branch for tier fixes
 
 ### Tier 4 — Tilt (Inner-Loop Iteration)
 
-**Run:** `./scripts/tilt-up.sh` (after Tier 3 kind cluster exists)
+**Run:** `./lab run 4` (after Tier 3 kind cluster exists)
 
 **Testing:** Fix the Tier 3 missing env var without a full cluster rebuild.
 
@@ -122,7 +145,7 @@ git checkout -b lab/$(whoami)    # your working branch for tier fixes
 
 ### Tier 5 — rhoai-in-kind (MLOps Platform Integration)
 
-**Run:** `./scripts/run-rhoai-in-kind.sh`
+**Run:** `./lab run 5`
 
 **Testing:** Does the sidecar hook into RHOAI's KServe control plane?
 
@@ -132,7 +155,7 @@ git checkout -b lab/$(whoami)    # your working branch for tier fixes
 
 ### Tier 6 — ArgoCD (GitOps Deployment)
 
-**Run:** Install ArgoCD; apply `config/argocd/application.yaml` (update `repoURL`).
+**Run:** `./lab run 6` then install ArgoCD and apply `config/argocd/application.yaml` (update `repoURL`).
 
 **Testing:** Can PR #104 deploy declaratively from Git?
 
@@ -144,7 +167,7 @@ Verify locally: `kubectl kustomize config/overlays/pr104` (expect error).
 
 ### Tier 7 — OpenShift (Production Environment)
 
-**Run:** `oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml`
+**Run:** `./lab run 7`
 
 **Testing:** Sidecar under production SCCs, routes, and real hardware.
 
@@ -185,13 +208,15 @@ Log timings in `metrics-log.csv`:
 
 ```bash
 git checkout -b lab/$(whoami)          # Step 0
-make test                              # Tier 1
-./scripts/run-kwok.sh                  # Tier 2 (100 × 5 = 500 pods)
-./scripts/run-kind.sh                  # Tier 3
-./scripts/tilt-up.sh                   # Tier 4
-./scripts/run-rhoai-in-kind.sh         # Tier 5
-kubectl apply -f config/argocd/        # Tier 6
-oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml  # Tier 7
+./lab verify                           # baseline integrity
+./lab run 1                            # Tier 1 envtest
+./lab run 2                            # Tier 2 KWOK (100 × 5 = 500 pods)
+./lab run 3                            # Tier 3 kind
+./lab run 4                            # Tier 4 Tilt
+./lab run 5                            # Tier 5 rhoai-in-kind
+./lab run 6                            # Tier 6 ArgoCD / Kustomize
+./lab run 7                            # Tier 7 OpenShift
+./lab reset                            # restore broken baseline for next run
 
 make podman-build                      # Operator image
 make podman-build-inference            # Inference server image

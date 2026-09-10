@@ -1,5 +1,6 @@
 bin/
 .venv/
+.lab/
 cover.out
 comm_stats.tmp
 .idea/

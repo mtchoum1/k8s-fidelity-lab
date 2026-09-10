@@ -58,3 +58,21 @@ install:
 .PHONY: deploy
 deploy:
 	kubectl apply -f config/operator/
+
+.PHONY: lab-verify
+lab-verify:
+	./scripts/lab-verify.sh
+
+.PHONY: lab-reset
+lab-reset:
+	./scripts/lab-reset.sh
+
+.PHONY: lab-status
+lab-status:
+	./lab status
+
+# Run a single tier: make lab-run TIER=3
+.PHONY: lab-run
+lab-run:
+	@test -n "$(TIER)" || (echo "Usage: make lab-run TIER=1"; exit 1)
+	./lab run $(TIER)
