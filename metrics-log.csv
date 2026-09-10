@@ -1,0 +1,8 @@
+Tier,Tool,Setup Time (s),Change Iteration Time (s),RAM Usage (MB/GB),CPU Usage (%),Confidence Score (%),Issues Caught,Issues Found,Notes
+1,envtest,,,,,20,"Go syntax, CRD Schema errors",,
+2,KWOK,,,,,40,"Controller deadlock under scale",,
+3,kind,,,,,65,"Missing container binaries, broken DNS",,
+4,tilt,,,,,65,"Velocity metric (Hot-reload speed)",,
+5,rhoai-in-kind,,,,,80,"Missing KServe / MLOps CRD dependencies",,
+6,argocd,,,,,90,"GitOps sync drift, broken Kustomize refs",,
+7,OpenShift,,,,,100,"SCC permission denied, Route ingress errors",,

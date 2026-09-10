@@ -1,0 +1,13 @@
+apiVersion: fidelity.ai/v1alpha1
+kind: ModelInferencePipeline
+metadata:
+  name: sklearn-iris-pipeline
+  namespace: default
+spec:
+  modelName: sklearn-iris
+  replicas: 1
+  image: ghcr.io/k8s-fidelity-lab/inference-server:latest
+  gpuCount: "0"
+  command:
+    - python
+    - inference_server.py

@@ -1,0 +1,8 @@
+# INTENTIONAL RUNTIME BUG (Tier 3 — kind):
+# inference_server.py imports torch, which is not installed in this image.
+# Fix: add `pip install torch` or remove the torch import.
+FROM python:3.11-slim
+WORKDIR /app
+COPY inference_server.py .
+EXPOSE 8080
+CMD ["python", "inference_server.py"]

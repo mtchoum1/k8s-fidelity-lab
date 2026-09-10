@@ -1,0 +1,12 @@
+# Tier 3 (kind): Uses broken default entrypoint and missing torch dependency.
+# Expect CrashLoopBackOff until Dockerfile.inference is fixed.
+apiVersion: fidelity.ai/v1alpha1
+kind: ModelInferencePipeline
+metadata:
+  name: kind-broken-pipeline
+  namespace: default
+spec:
+  modelName: sklearn-iris
+  replicas: 1
+  image: ghcr.io/k8s-fidelity-lab/inference-server:latest
+  gpuCount: "0"

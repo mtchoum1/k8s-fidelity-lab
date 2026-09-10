@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fidelity-lab
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/YOUR_ORG/k8s-fidelity-lab.git
+    targetRevision: main
+    path: config
+    directory:
+      recurse: true
+      include: "{crd/bases/*,operator/*,samples/modelpipeline_v1alpha1_basic.yaml}"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

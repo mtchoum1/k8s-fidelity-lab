@@ -1,0 +1,8 @@
+bin/
+.venv/
+cover.out
+comm_stats.tmp
+.idea/
+.vscode/
+*.swp
+.DS_Store

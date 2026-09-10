@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fidelity-lab-system
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fidelity-lab-operator
+  namespace: fidelity-lab-system
+  labels:
+    app: fidelity-lab-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fidelity-lab-operator
+  template:
+    metadata:
+      labels:
+        app: fidelity-lab-operator
+    spec:
+      serviceAccountName: fidelity-lab-operator
+      containers:
+        - name: manager
+          image: ghcr.io/k8s-fidelity-lab/operator:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /manager
+          args:
+            - --leader-elect
+          ports:
+            - name: metrics
+              containerPort: 8080
+            - name: health
+              containerPort: 8081
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fidelity-lab-operator
+  namespace: fidelity-lab-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: fidelity-lab-operator
+rules:
+  - apiGroups: ["fidelity.ai"]
+    resources: ["modelinferencepipelines", "modelinferencepipelines/status", "modelinferencepipelines/finalizers"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fidelity-lab-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: fidelity-lab-operator
+subjects:
+  - kind: ServiceAccount
+    name: fidelity-lab-operator
+    namespace: fidelity-lab-system
