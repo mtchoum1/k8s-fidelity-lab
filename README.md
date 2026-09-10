@@ -65,6 +65,33 @@ podman machine start
 
 ## Sequential Step-by-Step Execution Plan
 
+### Step 0: Fork or Branch (preserve the intentional bugs)
+
+**Do this first.** Each tier ends with you fixing one of the deliberate bugs. If you apply those fixes on `main`, you lose the broken baseline and cannot re-run the lab later.
+
+Pick one approach and stick with it:
+
+| Approach | When to use |
+|----------|-------------|
+| **Fork** on GitHub/GitLab | Best for workshops or sharing — your fork keeps the upstream repo unchanged |
+| **Local branch** | Best for solo practice — fast to set up, no remote needed |
+
+```bash
+# Option A — Fork on GitHub, then clone your copy
+gh repo fork YOUR_ORG/k8s-fidelity-lab --clone
+cd k8s-fidelity-lab
+
+# Option B — Branch locally; keep main as the frozen broken baseline
+git checkout -b broken-baseline    # snapshot of all intentional bugs (do not commit fixes here)
+git checkout -b lab/$(whoami)    # your working branch for tier fixes
+
+# Option C — Tag the starting point so you can always reset
+git tag lab-start
+git checkout -b my-fidelity-run
+```
+
+**Workflow:** Run each tier and observe the failure on your working branch (`lab/...` or your fork). Commit fixes there only. Leave `main` / `broken-baseline` / `lab-start` untouched so you — or the next person — can clone or `git checkout broken-baseline` and run the full ladder again.
+
 ### Stage 1: Unit & API Logic (envtest)
 
 **Run:** `./scripts/run-envtest.sh` or `go test ./controllers/... -v`
@@ -176,6 +203,8 @@ Log your manual measurements in `metrics-log.csv` or fill in the table below as 
 
 ## Fixing Each Intentional Bug
 
+Apply these fixes on your **working branch or fork** (see Step 0), not on `main` / `broken-baseline`.
+
 1. **Schema (Tier 1):** Remove `+kubebuilder:validation:Type=string` from `GPUCount` in `api/v1alpha1/modelpipeline_types.go`, regenerate CRD with `make manifests`.
 2. **Scale (Tier 2):** Remove `reconcileBarrier` / `reconcileCond` pattern in `controllers/modelpipeline_controller.go`.
 3. **Runtime (Tier 3):** Add `RUN pip install torch` to `Dockerfile.inference`, or fix the default `command` in the controller. Locally, `make uv-sync` installs torch into `.venv` for testing the fixed server.
@@ -184,6 +213,7 @@ Log your manual measurements in `metrics-log.csv` or fill in the table below as 
 ## Quick Reference
 
 ```bash
+git checkout -b lab/$(whoami)  # Step 0 — preserve broken baseline on main
 make uv-sync           # Python venv (.venv) with torch
 make test              # Tier 1
 ./scripts/run-kwok.sh  # Tier 2
