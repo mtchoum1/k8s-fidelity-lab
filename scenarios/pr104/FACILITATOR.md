@@ -32,7 +32,7 @@ git checkout -b lab/<name> lab-v1.0-pr104
 | Requirement | Tier | Notes |
 |-------------|------|-------|
 | Go 1.22+ | 1 | envtest auto-installs via setup-envtest |
-| KWOK | 2 | `PIPELINE_COUNT=10` for dry-run |
+| [KWOK](https://kwok.sigs.k8s.io/docs/user/install/) (`kwokctl`) | 2 | Learners install KWOK and run `kwokctl create cluster --name fidelity-kwok` before `./lab run 2`; `PIPELINE_COUNT=10` for dry-run |
 | Podman + kind | 3–4 | 8 GB RAM minimum |
 | OLM + kind | 5 | 12 GB RAM; allow 10 min install |
 | ArgoCD | 6 | Can demo with `kubectl kustomize` only |
@@ -59,6 +59,8 @@ git checkout -b lab/<name> lab-v1.0-pr104
 ### Tier 2 — KWOK (~15 min)
 
 **Run:** `./lab run 2` (use `PIPELINE_COUNT=20` for short demo)
+
+**Note:** KWOK fake nodes do not execute containers. The script runs `./bin/manager` **locally** against the KWOK API — not an in-cluster Deployment. Learners must rebuild after editing the controller.
 
 **Expected:** Controller requeues indefinitely; status never reaches `Running` at scale.
 

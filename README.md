@@ -55,7 +55,8 @@ k8s-fidelity-lab/
 - [Podman](https://podman.io/getting-started/installation)
 - [uv](https://docs.astral.sh/uv/) (Python venv)
 - `kubectl`
-- Optional per tier: [envtest](https://book.kubebuilder.io/reference/envtest), [KWOK](https://kwok.sigs.k8s.io/), [kind](https://kind.sigs.k8s.io/), [Tilt](https://tilt.dev/), [ArgoCD](https://argo-cd.readthedocs.io/), OpenShift CLI (`oc`)
+- Optional per tier: [envtest](https://book.kubebuilder.io/reference/envtest), [kind](https://kind.sigs.k8s.io/), [Tilt](https://tilt.dev/), [ArgoCD](https://argo-cd.readthedocs.io/), OpenShift CLI (`oc`)
+- **Tier 2:** [KWOK](https://kwok.sigs.k8s.io/) — install `kwokctl` and create a cluster before `./lab run 2` (see [KWOK install guide](https://kwok.sigs.k8s.io/docs/user/install/))
 
 ```bash
 go mod download

@@ -153,6 +153,13 @@ That means your **fix worked** — the tests just need updating.
 
 ## Tier 2 — KWOK (40% confidence)
 
+**Prerequisite:** Install [KWOK](https://kwok.sigs.k8s.io/docs/user/install/) (`kwokctl`) and create a cluster (the lab does not install KWOK for you):
+
+```bash
+kwokctl create cluster --name fidelity-kwok --wait 5m
+kubectl config use-context kwok-fidelity-kwok   # not "fidelity-kwok" (kwokctl hint is misleading)
+```
+
 ```bash
 ./lab run 2
 ./lab hint 2
@@ -189,12 +196,26 @@ if err := r.waitForPodStatuses(ctx, pipeline, deployName); err != nil {
 
 **Step 3 — Delete `waitForPodStatuses`** (or replace with non-blocking status update).
 
+**Step 4 — Rebuild and run locally** — KWOK fake nodes do **not** run real containers. `./lab run 2` builds and runs `./bin/manager` on your machine against the KWOK API. Editing `modelpipeline_controller.go` alone is not enough; you do not redeploy an in-cluster operator for this tier.
+
 **Verify:**
 
 ```bash
 PIPELINE_COUNT=20 ./scripts/run-kwok.sh   # short demo
 ./lab run 2                               # full 100 × 5 load
 ```
+
+After the fix, you should see `Pipeline status: N/N Running` and steady local operator logs (no `waiting on pod status updates` spam).
+
+### Common mistakes
+
+| Error | Cause |
+|-------|-------|
+| `kwokctl not found` | Install KWOK before Tier 2 — see prerequisite above |
+| `KWOK cluster 'fidelity-kwok' not found` | Run `kwokctl create cluster --name fidelity-kwok` first; verify with `kwokctl get clusters` |
+| `context "fidelity-kwok" does not exist` | Use context `kwok-fidelity-kwok` (see prerequisite above) |
+| `no logs found for container "manager"` | Old workflow — KWOK cannot run in-cluster pods; use updated `./lab run 2` (local operator) |
+| CRs stay empty / no `Running` phase | Operator not running locally, or stale in-cluster Deployment still applied |
 
 ---
 
