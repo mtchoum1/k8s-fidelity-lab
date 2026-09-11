@@ -58,6 +58,10 @@ detect_github_token() {
 
 repo_url="$(detect_repo_url)"
 branch="$(detect_branch)"
+# ArgoCD cannot resolve branch names with "/" (e.g. lab/mtchoumi) unless fully qualified.
+if [[ "$branch" != refs/* ]]; then
+  branch="refs/heads/${branch}"
+fi
 token="$(detect_github_token)"
 
 if [[ -z "$branch" ]]; then
