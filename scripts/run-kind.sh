@@ -35,8 +35,25 @@ kind_load_image "$SIDECAR_IMG" "$CLUSTER_NAME"
 kubectl apply -f "$ROOT/config/crd/bases/"
 kubectl apply -f "$ROOT/config/operator/"
 
+echo "Waiting for operator to be ready..."
+kubectl -n fidelity-lab-system rollout status deployment/fidelity-lab-operator --timeout=120s
+
 echo "Applying PR #104 sample with broken sidecar env (expect CrashLoopBackOff)..."
 kubectl apply -f "$ROOT/config/samples/modelpipeline_v1alpha1_kind-broken.yaml"
 
-echo "Check pod status:"
-kubectl get pods -w
+echo "Waiting for operator to create inference pod (up to 120s)..."
+for _ in $(seq 1 60); do
+  if kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken --no-headers 2>/dev/null | grep -q .; then
+    break
+  fi
+  sleep 2
+done
+
+if ! kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken --no-headers 2>/dev/null | grep -q .; then
+  echo "No inference pod yet. Check operator logs:"
+  kubectl -n fidelity-lab-system logs -l app=fidelity-lab-operator --tail=30
+  exit 1
+fi
+
+echo "Inference pod status (Ctrl+C to stop watching):"
+kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken -w

@@ -89,9 +89,11 @@ lab_run_tier() {
         return 1
       fi
       echo ""
-      echo "Next: install ArgoCD and apply config/argocd/application.yaml (update repoURL)."
-      echo "  kubectl apply -f config/argocd/namespace.yaml"
-      echo "  kubectl apply -f config/argocd/application.yaml"
+      echo "Next: install ArgoCD and connect this repo/branch:"
+      echo "  kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -"
+      echo "  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+      echo "  ./scripts/argocd-connect-github.sh   # auto-detects origin + current branch"
+      echo "  ./scripts/argocd-login.sh"
       ;;
     7)
       echo "=== Tier 7: OpenShift production ==="

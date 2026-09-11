@@ -5,13 +5,15 @@
 
 ## What Changed in PR #104
 
-| Area | Change |
-|------|--------|
-| **CRD API** (`api/v1alpha1/`) | Added `spec.gpuMemoryRequirement` and `spec.sidecarLogging: true` |
-| **Controller** (`controllers/`) | Injects a metrics sidecar; dynamically scales replicas by GPU tier |
-| **GitOps** (`config/overlays/pr104/`) | Kustomize overlay with RHOAI `InferenceService` annotations |
-| **RHOAI** (`rhoai/`) | KServe `InferenceService` bridge |
-| **Sidecar** (`Dockerfile.sidecar`) | New metrics/logging sidecar image |
+
+| Area                                  | Change                                                             |
+| ------------------------------------- | ------------------------------------------------------------------ |
+| **CRD API** (`api/v1alpha1/`)         | Added `spec.gpuMemoryRequirement` and `spec.sidecarLogging: true`  |
+| **Controller** (`controllers/`)       | Injects a metrics sidecar; dynamically scales replicas by GPU tier |
+| **GitOps** (`config/overlays/pr104/`) | Kustomize overlay with RHOAI `InferenceService` annotations        |
+| **RHOAI** (`rhoai/`)                  | KServe `InferenceService` bridge                                   |
+| **Sidecar** (`Dockerfile.sidecar`)    | New metrics/logging sidecar image                                  |
+
 
 ```
 [PR #104 Submitted]
@@ -25,6 +27,8 @@
        └── Tier 7 (OpenShift) ─► SCC blocks root sidecar on /var/log
 ```
 
+
+
 ## Before You Start
 
 ```bash
@@ -37,19 +41,25 @@ Keep `main` / `lab-v1.0-pr104` frozen. Commit fixes only on your `lab/*` branch.
 
 > After applying fixes, `./lab verify` will fail — that is expected. Use `./lab run <tier>` to validate.
 
+
+
 ## Scorecard
 
-| Tier | Tool | Setup Time | Iteration Time | RAM | CPU % | What failed? | What you fixed |
-|------|------|------------|----------------|-----|-------|--------------|----------------|
-| 1 | envtest | | | | | | |
-| 2 | KWOK | | | | | | |
-| 3 | kind | | | | | | |
-| 4 | tilt | | | | | | |
-| 5 | rhoai-in-kind | | | | | | |
-| 6 | argocd | | | | | | |
-| 7 | OpenShift | | | | | | |
+
+| Tier | Tool          | Setup Time | Iteration Time | RAM | CPU % | What failed? | What you fixed |
+| ---- | ------------- | ---------- | -------------- | --- | ----- | ------------ | -------------- |
+| 1    | envtest       |            |                |     |       |              |                |
+| 2    | KWOK          |            |                |     |       |              |                |
+| 3    | kind          |            |                |     |       |              |                |
+| 4    | tilt          |            |                |     |       |              |                |
+| 5    | rhoai-in-kind |            |                |     |       |              |                |
+| 6    | argocd        |            |                |     |       |              |                |
+| 7    | OpenShift     |            |                |     |       |              |                |
+
 
 ---
+
+
 
 ## Tier 1 — envtest (20% confidence)
 
@@ -61,13 +71,18 @@ Keep `main` / `lab-v1.0-pr104` frozen. Commit fixes only on your `lab/*` branch.
 **What you're testing:** CRD schema for `spec.gpuMemoryRequirement` and controller unit logic.
 
 **Observe:**
+
 - [ ] Which test passes? Which test documents the schema rejection?
 - [ ] What happens when `gpuMemoryRequirement` is `"8Gi"` (not in the scale map)?
+
+
 
 ### Symptoms
 
 - CRs without `gpuMemoryRequirement` are rejected at admission
 - Controller panics on unknown GPU tiers (e.g. `"8Gi"`)
+
+
 
 ### Fix steps
 
@@ -123,10 +138,12 @@ return base * scale.Multiplier
 
 After Steps 1–3, the old tests still expect the *broken* behavior and will fail. You must invert them:
 
-| Test | Change from | Change to |
-|------|-------------|-----------|
+
+| Test                           | Change from                      | Change to                           |
+| ------------------------------ | -------------------------------- | ----------------------------------- |
 | Missing `gpuMemoryRequirement` | `Expect(err).To(HaveOccurred())` | `Expect(err).NotTo(HaveOccurred())` |
-| `gpuMemoryRequirement: "8Gi"` | `Expect(...).To(Panic())` | `Expect(...).NotTo(Panic())` |
+| `gpuMemoryRequirement: "8Gi"`  | `Expect(...).To(Panic())`        | `Expect(...).NotTo(Panic())`        |
+
 
 If you skip this step you will see:
 
@@ -141,15 +158,19 @@ That means your **fix worked** — the tests just need updating.
 
 ### Common mistakes
 
-| Error | Cause |
-|-------|-------|
-| `make manifests` fails | Use `make manifests` (not `make manifest`); Makefile auto-installs `controller-gen` |
-| CRD still requires field | Missing `,omitempty` — re-run `make manifests` |
+
+| Error                                              | Cause                                                                                                                                               |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `make manifests` fails                             | Use `make manifests` (not `make manifest`); Makefile auto-installs `controller-gen`                                                                 |
+| CRD still requires field                           | Missing `,omitempty` — re-run `make manifests`                                                                                                      |
 | `grep` still shows `gpuMemoryRequirement` required | Wrong CRD file, or `_modelinferencepipelines.yaml` created — fix `+groupName` in `groupversion_info.go`, delete stray file, re-run `make manifests` |
-| `Expected an error to have occurred` | CRD fixed but test not updated (Step 4) |
-| Tests pass but cluster rejects CR | CRD not applied: `kubectl apply -f config/crd/bases/` |
+| `Expected an error to have occurred`               | CRD fixed but test not updated (Step 4)                                                                                                             |
+| Tests pass but cluster rejects CR                  | CRD not applied: `kubectl apply -f config/crd/bases/`                                                                                               |
+
 
 ---
+
+
 
 ## Tier 2 — KWOK (40% confidence)
 
@@ -168,13 +189,18 @@ kubectl config use-context kwok-fidelity-kwok   # not "fidelity-kwok" (kwokctl h
 **What you're testing:** 100 pipelines × 5 replicas = 500 pods.
 
 **Observe:**
+
 - [ ] How long until reconcile stalls?
 - [ ] Operator logs: `kubectl -n fidelity-lab-system logs -l app=fidelity-lab-operator`
+
+
 
 ### Symptoms
 
 - Operator logs: `waiting on pod status updates`
 - Pipelines never reach `Running` at scale
+
+
 
 ### Fix steps
 
@@ -186,7 +212,7 @@ kubectl config use-context kwok-fidelity-kwok   # not "fidelity-kwok" (kwokctl h
 var podStatusPollLock sync.Mutex   // delete this
 ```
 
-**Step 2 — Remove the blocking call from `Reconcile`:**
+**Step 2 — Remove the blocking call from** `Reconcile`**:**
 
 ```go
 if err := r.waitForPodStatuses(ctx, pipeline, deployName); err != nil {
@@ -194,7 +220,7 @@ if err := r.waitForPodStatuses(ctx, pipeline, deployName); err != nil {
 }
 ```
 
-**Step 3 — Delete `waitForPodStatuses`** (or replace with non-blocking status update).
+**Step 3 — Delete** `waitForPodStatuses` (or replace with non-blocking status update).
 
 **Step 4 — Rebuild and run locally** — KWOK fake nodes do **not** run real containers. `./lab run 2` builds and runs `./bin/manager` on your machine against the KWOK API. Editing `modelpipeline_controller.go` alone is not enough; you do not redeploy an in-cluster operator for this tier.
 
@@ -209,15 +235,19 @@ After the fix, you should see `Pipeline status: N/N Running` and steady local op
 
 ### Common mistakes
 
-| Error | Cause |
-|-------|-------|
-| `kwokctl not found` | Install KWOK before Tier 2 — see prerequisite above |
+
+| Error                                    | Cause                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `kwokctl not found`                      | Install KWOK before Tier 2 — see prerequisite above                                         |
 | `KWOK cluster 'fidelity-kwok' not found` | Run `kwokctl create cluster --name fidelity-kwok` first; verify with `kwokctl get clusters` |
-| `context "fidelity-kwok" does not exist` | Use context `kwok-fidelity-kwok` (see prerequisite above) |
-| `no logs found for container "manager"` | Old workflow — KWOK cannot run in-cluster pods; use updated `./lab run 2` (local operator) |
-| CRs stay empty / no `Running` phase | Operator not running locally, or stale in-cluster Deployment still applied |
+| `context "fidelity-kwok" does not exist` | Use context `kwok-fidelity-kwok` (see prerequisite above)                                   |
+| `no logs found for container "manager"`  | Old workflow — KWOK cannot run in-cluster pods; use updated `./lab run 2` (local operator)  |
+| CRs stay empty / no `Running` phase      | Operator not running locally, or stale in-cluster Deployment still applied                  |
+
 
 ---
+
+
 
 ## Tier 3 — kind (65% confidence)
 
@@ -230,14 +260,19 @@ podman machine start   # macOS
 **What you're testing:** Sidecar container pulls, starts, and mounts volumes.
 
 **Observe:**
+
 - [ ] `kubectl get pods` — which container is `CrashLoopBackOff`?
 - [ ] `kubectl logs <pod> -c metrics-sidecar`
+
+
 
 ### Symptoms
 
 ```
 error: SIDECAR_LOG_DIR environment variable is required
 ```
+
+
 
 ### Fix steps
 
@@ -273,7 +308,11 @@ kubectl logs <pod-name> -c metrics-sidecar
 
 ---
 
+
+
 ## Tier 4 — Tilt (65% confidence, velocity)
+
+**Prerequisite:** Tier 3 kind cluster running (`kubectl config current-context` → `kind-fidelity-kind`), [Tilt](https://docs.tilt.dev/install.html) installed, Podman running (`podman machine start` on macOS). Use `./scripts/tilt-up.sh` — not bare `tilt up` (sets Podman socket + `DOCKER_BUILDKIT=0`).
 
 ```bash
 ./lab run 4
@@ -283,8 +322,11 @@ kubectl logs <pod-name> -c metrics-sidecar
 **What you're testing:** Time from saving the Tier 3 fix to seeing updated behavior.
 
 **Observe:**
+
 - [ ] Seconds from Ctrl+S to healthy sidecar in Tilt UI?
 - [ ] Compare to a full `./lab run 3` rebuild
+
+
 
 ### Fix steps
 
@@ -296,7 +338,22 @@ No new bug. Apply the Tier 3 fix, then:
 
 Save `controllers/modelpipeline_controller.go` and record hot-reload time in your scorecard (target: < 3 seconds).
 
+### Common mistakes
+
+
+| Error                                                           | Cause                                                                                                                                        |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `failed to dial gRPC: unable to upgrade to h2c, received 404`   | Podman does not support Docker BuildKit — run `./scripts/tilt-up.sh` (sets `DOCKER_BUILDKIT=0`), not `tilt up` directly                      |
+| `Error loading image to KIND: exit status 1`                    | Tilt's built-in `kind load` fails with Podman — use updated Tiltfile (`custom_build` + `kind load image-archive`) via `./scripts/tilt-up.sh` |
+| `Image not used in any Kubernetes config` for inference/sidecar | Harmless before fix — images are in the CR `spec`, not a Pod; Tiltfile uses `k8s_kind()` to wire them up                                     |
+| `Kind without a local image registry`                           | Informational only — safe to ignore for this lab                                                                                             |
+| Build succeeds but cluster unchanged                            | Wrong kube context — Tiltfile allows only `kind-fidelity-kind`; Tier 3 kind cluster must still be running                                    |
+| `tilt not found`                                                | Install Tilt and re-run `./lab run 4`                                                                                                        |
+
+
 ---
+
+
 
 ## Tier 5 — rhoai-in-kind (80% confidence)
 
@@ -308,14 +365,19 @@ Save `controllers/modelpipeline_controller.go` and record hot-reload time in you
 **What you're testing:** KServe / RHOAI integration for the sidecar-enabled pipeline.
 
 **Observe:**
+
 - [ ] Does `InferenceService` apply succeed?
 - [ ] What apiVersion error appears?
+
+
 
 ### Symptoms
 
 ```
 no matches for kind "InferenceService" in version "serving.kserve.io/v1beta1"
 ```
+
+
 
 ### Fix steps
 
@@ -340,7 +402,23 @@ kubectl apply -k rhoai/
 kubectl get inferenceservice -n opendatahub
 ```
 
+
+
+### Common mistakes
+
+
+| Error                                                      | Cause                                                                                                                    |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `clusterserviceversions... metadata.annotations: Too long` | OLM CRD install via plain `kubectl apply` — fixed in `run-rhoai-in-kind.sh` (uses `--server-side`); re-run `./lab run 5` |
+| `the server doesn't have a resource type "inferenceservice"` | KServe CRD not installed yet — re-run `./lab run 5` (installs lab KServe CRD before InferenceService) |
+| `no matches ... v1beta1` | **Tier 5 bug** — CRD serves only `v1`; fix apiVersion in `rhoai/inferenceservice-v1beta1.yaml` |
+| `no matches ... v1` after your fix | CRD missing — run `./lab run 5` first, then apply InferenceService |
+| OLM install hangs                                          | Allow 5–10 min; needs Tier 3 kind cluster with ~12 GB RAM free                                                           |
+
+
 ---
+
+
 
 ## Tier 6 — ArgoCD (90% confidence)
 
@@ -352,14 +430,19 @@ kubectl get inferenceservice -n opendatahub
 **What you're testing:** Declarative deploy from `config/overlays/pr104`.
 
 **Observe:**
+
 - [ ] `kubectl kustomize config/overlays/pr104` — should **fail** on baseline
 - [ ] ArgoCD sync error after install
+
+
 
 ### Symptoms
 
 ```
 error: unable to find patch path /spec/sidecarLoging
 ```
+
+
 
 ### Fix steps
 
@@ -379,9 +462,62 @@ error: unable to find patch path /spec/sidecarLoging
 kubectl kustomize config/overlays/pr104   # should succeed
 ```
 
-Install ArgoCD and apply `config/argocd/application.yaml` (update `repoURL`).
+**Step 2 — Install ArgoCD and apply the Application:**
+
+```bash
+kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl wait --for=condition=Available deployment/argocd-server -n argocd --timeout=300s
+./scripts/argocd-connect-github.sh   # uses git origin + current branch (lab/mtchoumi, etc.)
+```
+
+Or set explicitly:
+
+```bash
+ARGOCD_REPO_URL=https://github.com/mtchoum1/k8s-fidelity-lab.git \
+ARGOCD_TARGET_REVISION=lab/mtchoumi \
+./scripts/argocd-connect-github.sh
+```
+
+**Step 3 — Web UI login** (recommended on kind):
+
+```bash
+chmod +x scripts/argocd-ui-access.sh scripts/argocd-reset-admin.sh
+./scripts/argocd-ui-access.sh
+# follow printed steps: port-forward to :80, open http://localhost:8080
+```
+
+Username is **`admin`** (not `adminuser`). Copy the password to clipboard:
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d | pbcopy
+```
+
+If you still get “Invalid username or password”, reset to a known password:
+
+```bash
+./scripts/argocd-reset-admin.sh          # sets password to "admin"
+./scripts/argocd-ui-access.sh
+```
+
+**Step 4 — CLI login** (optional):
+
+```bash
+./scripts/argocd-login.sh
+```
+
+### Common mistakes
+
+| Error | Cause |
+|-------|-------|
+| `Invalid username or password` | Username must be **`admin`**; paste password with `pbcopy` or run `./scripts/argocd-reset-admin.sh` |
+| UI blank / TLS errors | Use HTTP: `./scripts/argocd-ui-access.sh` then `port-forward ... 8080:80` and open **http://**localhost:8080 |
+| `unable to forward port ... Pending` | Wait for `kubectl -n argocd wait --for=condition=Available deployment/argocd-server` |
+| `zsh: bad pattern: ^[[200~kubectl` | Bracketed-paste artifact — retype the command without paste markers |
 
 ---
+
+
 
 ## Tier 7 — OpenShift (100% confidence)
 
@@ -393,14 +529,19 @@ Install ArgoCD and apply `config/argocd/application.yaml` (update `repoURL`).
 **What you're testing:** Production SCCs, routes, and real hardware.
 
 **Observe:**
+
 - [ ] `oc describe pod <name>` — SCC denial events?
 - [ ] `CreateContainerConfigError` for root + `/var/log` mount?
+
+
 
 ### Symptoms
 
 ```
 unable to validate against any security context constraint
 ```
+
+
 
 ### Fix steps
 
@@ -415,7 +556,7 @@ SecurityContext: &corev1.SecurityContext{
 },
 ```
 
-**Step 2 — Replace `hostPath` with `emptyDir`** in `buildDeployment`:
+**Step 2 — Replace** `hostPath` **with** `emptyDir` in `buildDeployment`:
 
 ```go
 volumes = append(volumes, corev1.Volume{
@@ -446,6 +587,8 @@ oc get pods -w
 
 ---
 
+
+
 ## Reset for Another Run
 
 ```bash
@@ -454,8 +597,11 @@ oc get pods -w
 git checkout -b lab/$(whoami)-run2 lab-v1.0-pr104
 ```
 
+
+
 ## Reflection Questions
 
 1. Which tier gave you the highest confidence gain for the lowest cost?
 2. Which bug would have reached production if you stopped at Tier 2?
 3. Would your team's CI run `./lab verify` on the frozen baseline branch?
+

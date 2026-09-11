@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
   - odh-subscription.yaml
   - kserve-integration.yaml
+  - kserve-crds-lab.yaml
   - inferenceservice-v1beta1.yaml

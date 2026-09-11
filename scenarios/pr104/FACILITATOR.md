@@ -92,6 +92,8 @@ Env: []corev1.EnvVar{{Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"}},
 
 **Run:** `./lab run 4` (after Tier 3 kind cluster exists)
 
+**Note:** Learners must use `./scripts/tilt-up.sh` with the Tier 3 kind cluster still running. Podman + Tilt requires `DOCKER_BUILDKIT=0` and the Tiltfile's `custom_build` + `kind load image-archive` path (Tilt's built-in kind load fails with Podman).
+
 **Expected:** Hot-reload in < 3 s after controller fix.
 
 **Talking point:** Same fidelity as kind; 10× faster iteration — measure and log in scorecard.
