@@ -96,16 +96,7 @@ lab_run_tier() {
       echo "  ./scripts/argocd-login.sh"
       ;;
     7)
-      echo "=== Tier 7: OpenShift production ==="
-      if ! command -v oc &>/dev/null; then
-        echo "oc CLI not found. Apply manually on OpenShift:"
-        echo "  oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml"
-        echo "Expect CreateContainerConfigError from restricted-v2 SCC."
-        return 0
-      fi
-      echo "Applying PR #104 OpenShift sample (expect SCC failure on baseline)..."
-      oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml
-      echo "Watch: oc get pods -w"
+      ./scripts/run-openshift.sh
       ;;
     all)
       echo "=== Running lab-verify (all tier integrity checks) ==="

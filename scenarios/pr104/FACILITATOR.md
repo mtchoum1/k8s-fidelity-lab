@@ -128,9 +128,13 @@ kubectl kustomize config/overlays/pr104
 
 ### Tier 7 — OpenShift (~15 min)
 
-**Run:** `./lab run 7` or pre-recorded `oc describe pod` output
+**Prereq:** CRC running (`crc start`), `eval $(crc oc-env)`, `oc login`. Not kind. All resources in `fidelity-lab-system`.
+
+**Run:** `./scripts/run-openshift.sh` or `./lab run 7`
 
 **Expected:** `CreateContainerConfigError` — SCC `restricted-v2` denies `runAsUser: 0` + hostPath `/var/log`.
+
+**Common learner mistake:** `oc apply` sample only → `no matches for kind ModelInferencePipeline` (CRD missing).
 
 **Fix checklist:**
 - [ ] `runAsNonRoot: true` on sidecar

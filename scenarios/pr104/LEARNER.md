@@ -407,13 +407,13 @@ kubectl get inferenceservice -n opendatahub
 ### Common mistakes
 
 
-| Error                                                      | Cause                                                                                                                    |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `clusterserviceversions... metadata.annotations: Too long` | OLM CRD install via plain `kubectl apply` — fixed in `run-rhoai-in-kind.sh` (uses `--server-side`); re-run `./lab run 5` |
-| `the server doesn't have a resource type "inferenceservice"` | KServe CRD not installed yet — re-run `./lab run 5` (installs lab KServe CRD before InferenceService) |
-| `no matches ... v1beta1` | **Tier 5 bug** — CRD serves only `v1`; fix apiVersion in `rhoai/inferenceservice-v1beta1.yaml` |
-| `no matches ... v1` after your fix | CRD missing — run `./lab run 5` first, then apply InferenceService |
-| OLM install hangs                                          | Allow 5–10 min; needs Tier 3 kind cluster with ~12 GB RAM free                                                           |
+| Error                                                        | Cause                                                                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `clusterserviceversions... metadata.annotations: Too long`   | OLM CRD install via plain `kubectl apply` — fixed in `run-rhoai-in-kind.sh` (uses `--server-side`); re-run `./lab run 5` |
+| `the server doesn't have a resource type "inferenceservice"` | KServe CRD not installed yet — re-run `./lab run 5` (installs lab KServe CRD before InferenceService)                    |
+| `no matches ... v1beta1`                                     | **Tier 5 bug** — CRD serves only `v1`; fix apiVersion in `rhoai/inferenceservice-v1beta1.yaml`                           |
+| `no matches ... v1` after your fix                           | CRD missing — run `./lab run 5` first, then apply InferenceService                                                       |
+| OLM install hangs                                            | Allow 5–10 min; needs Tier 3 kind cluster with ~12 GB RAM free                                                           |
 
 
 ---
@@ -487,7 +487,7 @@ chmod +x scripts/argocd-ui-access.sh scripts/argocd-reset-admin.sh
 # follow printed steps: port-forward to :80, open http://localhost:8080
 ```
 
-Username is **`admin`** (not `adminuser`). Copy the password to clipboard:
+Username is `admin` (not `adminuser`). Copy the password to clipboard:
 
 ```bash
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d | pbcopy
@@ -506,14 +506,18 @@ If you still get “Invalid username or password”, reset to a known password:
 ./scripts/argocd-login.sh
 ```
 
+
+
 ### Common mistakes
 
-| Error | Cause |
-|-------|-------|
-| `Invalid username or password` | Username must be **`admin`**; paste password with `pbcopy` or run `./scripts/argocd-reset-admin.sh` |
-| UI blank / TLS errors | Use HTTP: `./scripts/argocd-ui-access.sh` then `port-forward ... 8080:80` and open **http://**localhost:8080 |
-| `unable to forward port ... Pending` | Wait for `kubectl -n argocd wait --for=condition=Available deployment/argocd-server` |
-| `zsh: bad pattern: ^[[200~kubectl` | Bracketed-paste artifact — retype the command without paste markers |
+
+| Error                                | Cause                                                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `Invalid username or password`       | Username must be `admin`; paste password with `pbcopy` or run `./scripts/argocd-reset-admin.sh`              |
+| UI blank / TLS errors                | Use HTTP: `./scripts/argocd-ui-access.sh` then `port-forward ... 8080:80` and open **http://**localhost:8080 |
+| `unable to forward port ... Pending` | Wait for `kubectl -n argocd wait --for=condition=Available deployment/argocd-server`                         |
+| `zsh: bad pattern: ^[[200~kubectl`   | Bracketed-paste artifact — retype the command without paste markers                                          |
+
 
 ---
 
@@ -521,17 +525,68 @@ If you still get “Invalid username or password”, reset to a known password:
 
 ## Tier 7 — OpenShift (100% confidence)
 
+**Requires OpenShift Local (CRC) or a real OpenShift cluster — not kind.** SCC enforcement does not exist on kind.
+
 ```bash
 ./lab run 7
 ./lab hint 7
 ```
 
-**What you're testing:** Production SCCs, routes, and real hardware.
+**What you're testing:** Production SCCs block root sidecar + hostPath `/var/log`.
 
-**Observe:**
+### Setup (CRC)
 
-- [ ] `oc describe pod <name>` — SCC denial events?
-- [ ] `CreateContainerConfigError` for root + `/var/log` mount?
+**Step 1 — Start OpenShift Local from the terminal** (not Podman Desktop’s Start button):
+
+```bash
+podman machine stop          # free vfkit RAM if CRC fails to start
+crc start                    # ~5–10 min; note kubeadmin password in output
+eval $(crc oc-env)
+oc login -u developer -p developer https://api.crc.testing:6443
+oc get nodes
+```
+
+**Step 2 — Log in to Quay and run Tier 7:**
+
+Images push to [quay.io/mtchoumi-aaet/lab-image](https://quay.io/repository/mtchoumi-aaet/lab-image) (tags: `operator`, `inference-server`, `metrics-sidecar`).
+
+```bash
+export QUAY_USERNAME=your-quay-user
+export QUAY_TOKEN=your-quay-token    # Account Settings → Generate Encrypted Password
+
+chmod +x scripts/run-openshift.sh
+./scripts/run-openshift.sh
+# or: ./lab run 7
+oc project fidelity-lab-system   # operator + inference pods live here
+```
+
+This builds images, pushes to Quay, installs the CRD/operator, and applies the Tier 7 sample — **all in `fidelity-lab-system`**. For a private repo, `QUAY_USERNAME` + `QUAY_TOKEN` also create pull secrets on the cluster.
+
+**Observe** (all in `fidelity-lab-system`):
+
+- [ ] `oc get deployment pr104-openshift-sidecar-inference` — `READY 0/2`, `ReplicaFailure` / `FailedCreate`
+- [ ] `oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar` — SCC denial: `hostPath volumes are not allowed`, `runAsUser: 0`
+- [ ] `oc get pods -l fidelity.ai/pipeline=pr104-openshift-sidecar` — **may be empty** (OpenShift blocks pod creation before a pod exists)
+
+The operator pod (`fidelity-lab-operator-*`) will be `Running` — that is expected. The SCC failure is on the **inference** deployment, not the operator.
+
+
+
+### Common mistakes
+
+
+| Error                                                     | Cause                                                                                                    |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `no matches for kind "ModelInferencePipeline"`            | CRD not installed — run `./scripts/run-openshift.sh` first, not only `oc apply` the sample               |
+| Pods `2/2 Running` on kind                                | Tier 7 needs OpenShift SCC — kind has no `restricted-v2`                                                 |
+| `provider does not have any connection to start`          | Podman Desktop UI error — use `crc start` in terminal                                                    |
+| `connection reset` on `oc login`                          | CRC stopped or conflicts with Podman machine — `podman machine stop && crc start`                        |
+| `dial tcp 127.0.0.1:80: connection refused` on image push | Use Quay (default) or `IMAGE_REGISTRY=crc` for internal registry                                         |
+| `unauthorized` on Quay push                               | `export QUAY_USERNAME` + `QUAY_TOKEN` then `podman login quay.io`                                        |
+| Operator `CrashLoopBackOff` / `lfstack.push` on CRC Mac   | Image built for wrong arch — script auto-detects `arm64` vs `amd64`; re-run `./scripts/run-openshift.sh` |
+| Inference `ImagePullBackOff` on `ghcr.io` (403)           | Use Quay refs — `./scripts/run-openshift.sh` or re-apply updated `config/samples/modelpipeline_v1alpha1_openshift-root.yaml` |
+| `No resources found` on `oc describe pod`                   | Wrong namespace — run `oc project fidelity-lab-system` (not `default`)                                                   |
+
 
 
 
@@ -539,6 +594,7 @@ If you still get “Invalid username or password”, reset to a known password:
 
 ```
 unable to validate against any security context constraint
+CreateContainerConfigError
 ```
 
 
@@ -581,8 +637,10 @@ VolumeMounts: []corev1.VolumeMount{
 **Verify:**
 
 ```bash
-oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml
+./scripts/run-openshift.sh   # rebuild operator with fixes
 oc get pods -w
+oc project fidelity-lab-system
+oc describe pod -l fidelity.ai/pipeline=pr104-openshift-sidecar
 ```
 
 ---
