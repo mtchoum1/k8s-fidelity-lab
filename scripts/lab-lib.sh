@@ -96,7 +96,16 @@ lab_run_tier() {
       echo "  ./scripts/argocd-login.sh"
       ;;
     7)
-      ./scripts/run-openshift.sh
+      if [[ -x "$LAB_ROOT/scripts/run-openshift.sh" ]]; then
+        exec "$LAB_ROOT/scripts/run-openshift.sh"
+      fi
+      echo "=== Tier 7: OpenShift production ==="
+      echo "run-openshift.sh not found. See scenarios/pr104/LEARNER.md Tier 7."
+      if ! command -v oc &>/dev/null; then
+        echo "oc CLI not found."
+        return 1
+      fi
+      echo "Manual fallback: oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml"
       ;;
     all)
       echo "=== Running lab-verify (all tier integrity checks) ==="

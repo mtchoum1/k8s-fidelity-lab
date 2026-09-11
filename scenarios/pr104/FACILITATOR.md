@@ -117,7 +117,7 @@ Env: []corev1.EnvVar{{Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"}},
 **Expected:**
 ```bash
 kubectl kustomize config/overlays/pr104
-# error: unable to find patch matching path /spec/sidecarLoging
+# error: testing value /spec/sidecarLoging failed: test failed
 ```
 
 **Fix:** Typo `sidecarLoging` → `sidecarLogging` in `sidecar-patch.yaml`
@@ -126,20 +126,38 @@ kubectl kustomize config/overlays/pr104
 
 ---
 
-### Tier 7 — OpenShift (~15 min)
+### Tier 7 — OpenShift (~30 min incl. CRC start)
 
-**Prereq:** CRC running (`crc start`), `eval $(crc oc-env)`, `oc login`. Not kind. All resources in `fidelity-lab-system`.
+**Prereq:** CRC running (`crc start`), `eval $(crc oc-env)`, `oc login`. **Not kind.** All Tier 7 resources live in `fidelity-lab-system`.
 
 **Run:** `./scripts/run-openshift.sh` or `./lab run 7`
 
-**Expected:** `CreateContainerConfigError` — SCC `restricted-v2` denies `runAsUser: 0` + hostPath `/var/log`.
+**Expected (baseline):**
+- Operator pod `Running`
+- Inference deployment `pr104-openshift-sidecar-inference` stuck at `0/2`
+- `oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar` shows SCC denial (`hostPath`, `runAsUser: 0`)
+- Inference pods may be **absent** — OpenShift blocks creation before a pod object exists
 
-**Common learner mistake:** `oc apply` sample only → `no matches for kind ModelInferencePipeline` (CRD missing).
+**Instructor diagnostics:**
+```bash
+oc project fidelity-lab-system
+oc get deployment pr104-openshift-sidecar-inference
+oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar | tail -25
+oc get pods -l app=fidelity-lab-operator
+```
+
+**Common learner mistakes:**
+- `oc apply` sample only → `no matches for kind ModelInferencePipeline` (CRD missing)
+- `oc describe pod` in `default` → wrong namespace
+- Expecting a pod to describe on baseline → point them at the ReplicaSet events
 
 **Fix checklist:**
-- [ ] `runAsNonRoot: true` on sidecar
-- [ ] Replace `hostPath` with `emptyDir`
-- [ ] Set `SIDECAR_LOG_DIR` to mounted emptyDir path
+- [ ] `runAsNonRoot: true` + non-zero UID on sidecar (`buildSidecarContainer`)
+- [ ] Replace `hostPath` with `emptyDir` (`buildDeployment`)
+- [ ] `SIDECAR_LOG_DIR=/var/log/sidecar` + mount `/var/log/sidecar` (Tier 3 + Tier 7)
+- [ ] Re-run `./scripts/run-openshift.sh` — not just `oc apply` the sample
+
+**Success:** `oc get pods -l fidelity.ai/pipeline=pr104-openshift-sidecar` → `2/2 Running`
 
 ---
 

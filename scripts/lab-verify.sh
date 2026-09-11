@@ -80,6 +80,10 @@ grep -q 'sidecarLoging' config/overlays/pr104/sidecar-patch.yaml \
   || fail "Tier 6 patch typo (sidecarLoging) missing"
 pass "Tier 6 patch typo present"
 
+if kubectl kustomize config/overlays/pr104 2>&1 | grep -q 'sidecarLoging'; then
+  pass "Tier 6 kustomize error references typo path"
+fi
+
 # --- Tier 7: root sidecar on /var/log ---
 grep -q 'INTENTIONAL TIER 7 BUG' controllers/modelpipeline_controller.go \
   || fail "Tier 7 SCC bug marker missing"

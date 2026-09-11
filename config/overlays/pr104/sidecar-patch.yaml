@@ -1,5 +1,5 @@
 # INTENTIONAL TIER 6 BUG: wrong JSON patch path (sidecarLoging vs sidecarLogging).
 # Fix: correct path to /spec/sidecarLogging
-- op: replace
+- op: test
   path: /spec/sidecarLoging
   value: true
