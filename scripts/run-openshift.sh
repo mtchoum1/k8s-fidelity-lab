@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=scripts/lab-metrics.sh
+source "$ROOT/scripts/lab-metrics.sh"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
 SIDECAR_IMG="ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest"
@@ -192,6 +194,8 @@ echo "Images:"
 echo "  operator:         ${OPERATOR_REF}"
 echo "  inference-server: ${INFERENCE_REF}"
 echo "  metrics-sidecar:  ${SIDECAR_REF}"
+lab_metrics_handoff "cluster deploy complete; verify SCC failure manually"
+
 echo ""
 echo "All Tier 7 resources are in namespace: ${LAB_NAMESPACE}"
 echo "  oc project ${LAB_NAMESPACE}"

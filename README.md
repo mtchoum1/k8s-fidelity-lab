@@ -117,11 +117,17 @@ git checkout -b lab/$(whoami)      # your working branch
 
 ## Scorecard
 
-Log timings in `metrics-log.csv` as you complete each tier:
+Each `./lab run <tier>` records setup time, elapsed time, peak RAM, and average CPU to `.lab/tier-metrics.csv` (gitignored). View collected data:
+
+```bash
+./lab metrics
+./lab status    # includes latest metrics rows
+```
+
+Copy values into `metrics-log.csv` for your cohort scorecard. For one-off commands:
 
 ```bash
 ./scripts/measure.sh "go test ./controllers/... -v"
-./scripts/measure.sh "./lab run 3"
 ```
 
 ## Quick Reference

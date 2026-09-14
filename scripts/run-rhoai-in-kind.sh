@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=scripts/lab-metrics.sh
+source "$ROOT/scripts/lab-metrics.sh"
 
 echo "=== Tier 5: rhoai-in-kind (MLOps integration) ==="
 
@@ -38,6 +40,8 @@ else
   echo "Expected on baseline: no matches for kind InferenceService in version serving.kserve.io/v1beta1"
   echo "Fix: change apiVersion to serving.kserve.io/v1 in rhoai/inferenceservice-v1beta1.yaml"
 fi
+
+lab_metrics_handoff "OLM/KServe installed; ODH continues in background"
 
 echo ""
 echo "ODH operator subscription is installing in the background (may take 5-10 min on kind)."

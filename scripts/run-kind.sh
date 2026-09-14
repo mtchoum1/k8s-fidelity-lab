@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=scripts/lab-metrics.sh
+source "$ROOT/scripts/lab-metrics.sh"
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
@@ -54,6 +56,8 @@ if ! kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken --
   kubectl -n fidelity-lab-system logs -l app=fidelity-lab-operator --tail=30
   exit 1
 fi
+
+lab_metrics_handoff "interactive pod watch"
 
 echo "Inference pod status (Ctrl+C to stop watching):"
 kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken -w

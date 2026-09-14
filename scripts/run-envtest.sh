@@ -17,8 +17,4 @@ if [[ -z "${KUBEBUILDER_ASSETS:-}" ]]; then
   echo "Using envtest binaries: ${KUBEBUILDER_ASSETS}"
 fi
 
-if [[ -x "$ROOT/scripts/measure.sh" ]]; then
-  "$ROOT/scripts/measure.sh" "go test ./controllers/... -v -count=1"
-else
-  go test ./controllers/... -v -count=1
-fi
+go test ./controllers/... -v -count=1

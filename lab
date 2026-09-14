@@ -34,6 +34,9 @@ case "$CMD" in
   status)
     lab_status
     ;;
+  metrics)
+    lab_metrics_show
+    ;;
   hint)
     [[ -n "$ARG" ]] || { lab_usage; exit 1; }
     lab_hint "$ARG"

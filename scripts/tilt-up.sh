@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=scripts/lab-metrics.sh
+source "$ROOT/scripts/lab-metrics.sh"
 # shellcheck source=scripts/container.sh
 source "$ROOT/scripts/container.sh"
 
@@ -23,6 +25,8 @@ if ! command -v tilt &>/dev/null; then
 fi
 
 echo "Using DOCKER_HOST=${DOCKER_HOST:-default} with DOCKER_BUILDKIT=0 (required for Podman)"
+
+lab_metrics_handoff "Tilt UI — record hot-reload iteration time manually in scorecard"
 
 cd "$ROOT"
 tilt up "$@"

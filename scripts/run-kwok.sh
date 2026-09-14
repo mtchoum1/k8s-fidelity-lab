@@ -6,6 +6,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=scripts/lab-metrics.sh
+source "$ROOT/scripts/lab-metrics.sh"
 CLUSTER_NAME="${KWOK_CLUSTER_NAME:-fidelity-kwok}"
 PIPELINE_COUNT="${PIPELINE_COUNT:-100}"
 MANAGER_PID=""
@@ -90,6 +92,8 @@ sleep 5
 RUNNING="$(kubectl get modelinferencepipelines -o jsonpath='{range .items[*]}{.status.phase}{"\n"}{end}' 2>/dev/null | grep -c Running || true)"
 TOTAL="$(kubectl get modelinferencepipelines --no-headers 2>/dev/null | wc -l | tr -d ' ')"
 echo "Pipeline status: ${RUNNING}/${TOTAL} Running"
+
+lab_metrics_handoff "interactive operator log watch"
 
 echo ""
 echo "Watch local operator logs (Ctrl+C to stop):"

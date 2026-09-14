@@ -8,6 +8,9 @@ export LAB_BASELINE_REF="${LAB_BASELINE_REF:-main}"
 LAB_STATE_DIR="${LAB_ROOT}/.lab"
 LAB_RUN_LOG="${LAB_STATE_DIR}/runs.log"
 
+# shellcheck source=scripts/lab-metrics.sh
+source "$LAB_ROOT/scripts/lab-metrics.sh"
+
 lab_ensure_state_dir() {
   mkdir -p "$LAB_STATE_DIR"
 }
@@ -28,6 +31,7 @@ Commands:
   verify        Confirm intentional bugs are still present (baseline integrity)
   reset         Restore scenario files from baseline ref (${LAB_BASELINE_REF})
   status        Show scenario, baseline integrity, and recent runs
+  metrics       Show collected time/RAM/CPU data per tier
   hint <tier>   Show symptom description without the full fix
 
 Environment:
@@ -58,58 +62,67 @@ lab_hint() {
 
 lab_run_tier() {
   local tier="$1"
+  local rc=0 notes=""
   cd "$LAB_ROOT"
+
+  if [[ "$tier" != "all" ]]; then
+    lab_metrics_begin "$tier"
+  fi
 
   case "$tier" in
     1)
       echo "=== Tier 1: envtest ==="
-      ./scripts/run-envtest.sh
+      ./scripts/run-envtest.sh || rc=1
       ;;
     2)
       echo "=== Tier 2: KWOK scale ==="
-      ./scripts/run-kwok.sh
+      ./scripts/run-kwok.sh || rc=1
       ;;
     3)
       echo "=== Tier 3: kind + sidecar runtime ==="
-      ./scripts/run-kind.sh
+      ./scripts/run-kind.sh || rc=1
       ;;
     4)
       echo "=== Tier 4: Tilt inner loop ==="
-      ./scripts/tilt-up.sh
+      ./scripts/tilt-up.sh || rc=1
       ;;
     5)
       echo "=== Tier 5: rhoai-in-kind ==="
-      ./scripts/run-rhoai-in-kind.sh
+      ./scripts/run-rhoai-in-kind.sh || rc=1
       ;;
     6)
       echo "=== Tier 6: GitOps / Kustomize ==="
       echo "Expect kustomize build to FAIL on the broken baseline:"
       if kubectl kustomize config/overlays/pr104; then
         echo "ERROR: overlay built successfully — Tier 6 bug may already be fixed."
-        return 1
+        rc=1
+      else
+        lab_metrics_handoff "kustomize build failed as expected"
+        echo ""
+        echo "Next: install ArgoCD and connect this repo/branch:"
+        echo "  kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -"
+        echo "  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
+        echo "  ./scripts/argocd-connect-github.sh   # auto-detects origin + current branch"
+        echo "  ./scripts/argocd-login.sh"
       fi
-      echo ""
-      echo "Next: install ArgoCD and connect this repo/branch:"
-      echo "  kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -"
-      echo "  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
-      echo "  ./scripts/argocd-connect-github.sh   # auto-detects origin + current branch"
-      echo "  ./scripts/argocd-login.sh"
       ;;
     7)
       if [[ -x "$LAB_ROOT/scripts/run-openshift.sh" ]]; then
-        exec "$LAB_ROOT/scripts/run-openshift.sh"
+        "$LAB_ROOT/scripts/run-openshift.sh" || rc=1
+      else
+        echo "=== Tier 7: OpenShift production ==="
+        echo "run-openshift.sh not found. See scenarios/pr104/LEARNER.md Tier 7."
+        if ! command -v oc &>/dev/null; then
+          echo "oc CLI not found."
+          rc=1
+        else
+          echo "Manual fallback: oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml"
+        fi
       fi
-      echo "=== Tier 7: OpenShift production ==="
-      echo "run-openshift.sh not found. See scenarios/pr104/LEARNER.md Tier 7."
-      if ! command -v oc &>/dev/null; then
-        echo "oc CLI not found."
-        return 1
-      fi
-      echo "Manual fallback: oc apply -f config/samples/modelpipeline_v1alpha1_openshift-root.yaml"
       ;;
     all)
       echo "=== Running lab-verify (all tier integrity checks) ==="
-      ./scripts/lab-verify.sh
+      ./scripts/lab-verify.sh || rc=1
       echo ""
       echo "Interactive tiers 2-7 require cluster tooling. Run individually:"
       echo "  ./lab run 1   # envtest"
@@ -122,6 +135,17 @@ lab_run_tier() {
       return 1
       ;;
   esac
+
+  if [[ "$tier" != "all" ]]; then
+    if [[ "$rc" -eq 0 ]]; then
+      notes="completed"
+    else
+      notes="failed or incomplete"
+    fi
+    lab_metrics_end "$([[ "$rc" -eq 0 ]] && echo ok || echo fail)" "$notes"
+  fi
+
+  return "$rc"
 }
 
 lab_status() {
@@ -145,5 +169,12 @@ lab_status() {
   else
     echo ""
     echo "Recent runs:   (none — run ./lab run <tier>)"
+  fi
+
+  if [[ -f "$LAB_METRICS_CSV" ]] && [[ "$(wc -l <"$LAB_METRICS_CSV")" -gt 1 ]]; then
+    echo ""
+    echo "Latest tier metrics:"
+    tail -3 "$LAB_METRICS_CSV" | column -t -s, 2>/dev/null || tail -3 "$LAB_METRICS_CSV"
+    echo "(full log: ./lab metrics)"
   fi
 }
