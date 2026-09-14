@@ -78,8 +78,8 @@ if kubectl kustomize config/overlays/pr104 >/dev/null 2>&1; then
 fi
 pass "Tier 6 kustomize overlay fails to build (expected)"
 
-grep -q 'sidecarLoging' config/overlays/pr104/sidecar-patch.yaml \
-  || fail "Tier 6 patch typo (sidecarLoging) missing"
+grep -qE '^\s*path:\s*/spec/sidecarLoging\s*$' config/overlays/pr104/sidecar-patch.yaml \
+  || fail "Tier 6 patch typo (path: /spec/sidecarLoging) missing"
 pass "Tier 6 patch typo present"
 
 if kubectl kustomize config/overlays/pr104 2>&1 | grep -q 'sidecarLoging'; then

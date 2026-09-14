@@ -20,6 +20,31 @@ lab_tier5_baseline_bug_present() {
     "$LAB_ROOT/rhoai/inferenceservice-v1beta1.yaml"
 }
 
+lab_tier6_baseline_bug_present() {
+  grep -qE '^\s*path:\s*/spec/sidecarLoging\s*$' \
+    "$LAB_ROOT/config/overlays/pr104/sidecar-patch.yaml"
+}
+
+lab_tier7_baseline_bug_present() {
+  grep -q 'HostPath: &corev1.HostPathVolumeSource' \
+    "$LAB_ROOT/controllers/modelpipeline_controller.go" \
+    && grep -q 'Path: "/var/log"' \
+    "$LAB_ROOT/controllers/modelpipeline_controller.go" \
+    && grep -q 'int64Ptr(0)' \
+    "$LAB_ROOT/controllers/modelpipeline_controller.go"
+}
+
+lab_tier7_fix_applied() {
+  grep -q 'EmptyDir: &corev1.EmptyDirVolumeSource' \
+    "$LAB_ROOT/controllers/modelpipeline_controller.go" \
+    && grep -q 'RunAsNonRoot: boolPtr(true)' \
+    "$LAB_ROOT/controllers/modelpipeline_controller.go" \
+    && ! grep -q 'int64Ptr(0)' \
+    "$LAB_ROOT/controllers/modelpipeline_controller.go" \
+    && ! grep -qE 'RunAsUser:\s+int64Ptr\(' \
+    "$LAB_ROOT/controllers/modelpipeline_controller.go"
+}
+
 lab_tier_pass() {
   echo ""
   echo "PASS: $*"
