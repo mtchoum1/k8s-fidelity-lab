@@ -11,6 +11,7 @@ source "$ROOT/scripts/lab-metrics.sh"
 # shellcheck source=scripts/cluster.sh
 source "$ROOT/scripts/cluster.sh"
 CLUSTER_NAME="${KWOK_CLUSTER_NAME:-fidelity-kwok}"
+LAB_CLUSTER_NAME="$CLUSTER_NAME"
 PIPELINE_COUNT="${PIPELINE_COUNT:-100}"
 MANAGER_PID=""
 
@@ -19,6 +20,7 @@ cleanup() {
     kill "$MANAGER_PID" 2>/dev/null || true
     wait "$MANAGER_PID" 2>/dev/null || true
   fi
+  _lab_cluster_cleanup_kwok
 }
 trap cleanup EXIT INT TERM
 

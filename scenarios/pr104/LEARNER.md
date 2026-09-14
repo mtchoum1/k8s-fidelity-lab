@@ -289,7 +289,7 @@ kubectl logs <pod-name> -c metrics-sidecar
 
 ## Tier 4 — Tilt (65% confidence, velocity)
 
-**Prerequisite:** [Tilt](https://docs.tilt.dev/install.html) installed. `./lab run 4` ensures the kind cluster exists (reuses Tier 3 cluster when present), starts Podman if needed, and runs `./scripts/tilt-up.sh` — not bare `tilt up` (sets Podman socket + `DOCKER_BUILDKIT=0`). Operator/images from Tier 3 are still required for a working hot-reload loop.
+**Prerequisite:** [Tilt](https://docs.tilt.dev/install.html) installed. `./lab run 4` ensures the kind cluster exists (reuses Tier 3 cluster when present), starts Podman if needed, and runs `./scripts/tilt-up.sh` — not bare `tilt up` (sets Podman socket + `DOCKER_BUILDKIT=0`). Operator/images from Tier 3 are still required for a working hot-reload loop. Continuing tiers 3→6 in one session: `export LAB_KEEP_CLUSTER=1` before each run; otherwise the kind cluster is deleted when you exit each tier script.
 
 ```bash
 ./lab run 4

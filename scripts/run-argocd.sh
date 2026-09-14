@@ -10,6 +10,7 @@ source "$ROOT/scripts/cluster.sh"
 
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
+register_lab_kind_cleanup "$CLUSTER_NAME"
 
 echo "=== Tier 6: GitOps / Kustomize + ArgoCD ==="
 
@@ -34,7 +35,13 @@ kubectl -n "$ARGOCD_NAMESPACE" wait --for=condition=Available deployment/argocd-
 lab_metrics_handoff "ArgoCD installed; connect repo and verify sync failure"
 
 echo ""
-echo "Next steps:"
+echo "Next steps (run in another terminal while this script waits):"
 echo "  ./scripts/argocd-connect-github.sh   # auto-detects origin + current branch"
 echo "  ./scripts/argocd-login.sh"
 echo "  ./scripts/argocd-ui-access.sh"
+echo ""
+if [[ -t 0 ]]; then
+  read -r -p "Press Enter when ArgoCD exploration is complete (deletes kind cluster unless LAB_KEEP_CLUSTER=1)... "
+else
+  echo "Non-interactive shell — deleting kind cluster on exit (set LAB_KEEP_CLUSTER=1 to keep)."
+fi

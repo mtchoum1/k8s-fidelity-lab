@@ -9,6 +9,7 @@ source "$ROOT/scripts/lab-metrics.sh"
 source "$ROOT/scripts/cluster.sh"
 
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
+register_lab_kind_cleanup "$CLUSTER_NAME"
 
 echo "=== Tier 5: rhoai-in-kind (MLOps integration) ==="
 
@@ -45,4 +46,5 @@ lab_metrics_handoff "OLM/KServe installed; ODH continues in background"
 
 echo ""
 echo "ODH operator subscription is installing in the background (may take 5-10 min on kind)."
-echo "Monitor: kubectl get pods -n opendatahub -w"
+echo "Watching opendatahub pods (Ctrl+C to stop and delete cluster):"
+kubectl get pods -n opendatahub -w

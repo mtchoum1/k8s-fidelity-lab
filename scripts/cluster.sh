@@ -1,8 +1,69 @@
 #!/usr/bin/env bash
-# Idempotent cluster provisioning for fidelity-lab tiers (timed via lab-metrics handoff).
+# Idempotent cluster provisioning and teardown for fidelity-lab tiers.
 set -euo pipefail
 
 : "${LAB_ROOT:=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+
+_LAB_CLUSTER_CLEANUP_DONE=0
+
+lab_cluster_keep_enabled() {
+  case "${LAB_KEEP_CLUSTER:-}" in
+    1|true|yes|TRUE|YES) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+delete_kind_cluster() {
+  local cluster_name="${1:-fidelity-kind}"
+
+  if lab_cluster_keep_enabled; then
+    echo "LAB_KEEP_CLUSTER set — leaving kind cluster '${cluster_name}'"
+    return 0
+  fi
+
+  require_kind
+  if kind get clusters 2>/dev/null | grep -qx "$cluster_name"; then
+    echo "Deleting kind cluster '${cluster_name}'..."
+    kind delete cluster --name "$cluster_name"
+  fi
+}
+
+delete_kwok_cluster() {
+  local cluster_name="${1:-fidelity-kwok}"
+
+  if lab_cluster_keep_enabled; then
+    echo "LAB_KEEP_CLUSTER set — leaving KWOK cluster '${cluster_name}'"
+    return 0
+  fi
+
+  require_kwokctl
+  if kwokctl get clusters 2>/dev/null | grep -qx "$cluster_name"; then
+    echo "Deleting KWOK cluster '${cluster_name}'..."
+    kwokctl delete cluster --name "$cluster_name"
+  fi
+}
+
+_lab_cluster_cleanup_kind() {
+  [[ "${_LAB_CLUSTER_CLEANUP_DONE}" == 1 ]] && return 0
+  _LAB_CLUSTER_CLEANUP_DONE=1
+  delete_kind_cluster "${LAB_CLUSTER_NAME:-fidelity-kind}"
+}
+
+_lab_cluster_cleanup_kwok() {
+  [[ "${_LAB_CLUSTER_CLEANUP_DONE}" == 1 ]] && return 0
+  _LAB_CLUSTER_CLEANUP_DONE=1
+  delete_kwok_cluster "${LAB_CLUSTER_NAME:-fidelity-kwok}"
+}
+
+register_lab_kind_cleanup() {
+  LAB_CLUSTER_NAME="${1:-fidelity-kind}"
+  trap '_lab_cluster_cleanup_kind' EXIT INT TERM
+}
+
+register_lab_kwok_cleanup() {
+  LAB_CLUSTER_NAME="${1:-fidelity-kwok}"
+  trap '_lab_cluster_cleanup_kwok' EXIT INT TERM
+}
 
 ensure_podman_machine() {
   if command -v podman &>/dev/null && podman machine list &>/dev/null 2>&1; then

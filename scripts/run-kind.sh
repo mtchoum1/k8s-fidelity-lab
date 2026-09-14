@@ -8,6 +8,7 @@ source "$ROOT/scripts/lab-metrics.sh"
 # shellcheck source=scripts/cluster.sh
 source "$ROOT/scripts/cluster.sh"
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
+register_lab_kind_cleanup "$CLUSTER_NAME"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
 SIDECAR_IMG="ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest"

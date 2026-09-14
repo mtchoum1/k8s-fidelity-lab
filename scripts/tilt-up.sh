@@ -11,6 +11,7 @@ source "$ROOT/scripts/cluster.sh"
 source "$ROOT/scripts/container.sh"
 
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
+register_lab_kind_cleanup "$CLUSTER_NAME"
 
 ensure_podman_machine
 setup_podman_env

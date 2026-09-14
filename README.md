@@ -66,6 +66,8 @@ chmod +x lab scripts/*.sh kwok/generate-nodes.sh
 
 On macOS: `podman machine start`
 
+Cluster teardown: tier scripts delete their cluster on exit (Ctrl+C ends interactive watches). Set `LAB_KEEP_CLUSTER=1` to keep the cluster when continuing tiers 3→6 in one session.
+
 ## Lab CLI
 
 ```bash
