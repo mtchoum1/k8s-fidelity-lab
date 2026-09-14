@@ -615,6 +615,8 @@ volumes = append(volumes, corev1.Volume{
 
 **4c — Align env var and mount** in `buildSidecarContainer` (Tier 3 + Tier 7):
 
+If you fixed Tier 3 with `SIDECAR_LOG_DIR=/var/log/sidecar` but left the volume mount at `/var/log`, that can still pass on kind — the subdirectory is created under the mounted path. For Tier 7, the mount path must match the env var. Align both:
+
 ```go
 Env: []corev1.EnvVar{
     {Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"},

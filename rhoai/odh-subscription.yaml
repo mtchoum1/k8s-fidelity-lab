@@ -1,5 +1,10 @@
 # OperatorGroup + Subscription for OpenDataHub in kind (rhoai-in-kind).
 # Requires operator-lifecycle-manager (OLM) installed in the kind cluster.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opendatahub
+---
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
@@ -8,11 +13,6 @@ metadata:
 spec:
   targetNamespaces:
     - opendatahub
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: opendatahub
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription

@@ -26,23 +26,29 @@ kubectl apply --server-side --force-conflicts -f \
 echo "Waiting for OLM pods..."
 kubectl -n olm wait --for=condition=Ready pod -l app=olm-operator --timeout=300s
 
-echo "Applying ODH namespace, subscription, and lab KServe CRD (v1 only)..."
-kubectl apply -f "$ROOT/rhoai/odh-subscription.yaml"
-kubectl apply -f "$ROOT/rhoai/kserve-integration.yaml"
-kubectl apply -f "$ROOT/rhoai/kserve-crds-lab.yaml"
-kubectl wait --for=condition=Established crd/inferenceservices.serving.kserve.io --timeout=120s
+lab_metrics_handoff "applying rhoai kustomize overlay"
 
-lab_metrics_handoff "applying InferenceService"
+echo "Installing ModelInferencePipeline CRD (required by kserve-integration)..."
+kubectl apply -f "$ROOT/config/crd/bases/fidelity.ai_modelinferencepipelines.yaml"
+kubectl wait --for=condition=Established crd/modelinferencepipelines.fidelity.ai --timeout=120s
 
 echo ""
-echo "Applying InferenceService..."
+echo "Applying ODH subscription, KServe CRD, and InferenceService..."
+echo "  kubectl apply -k rhoai/"
 set +e
-APPLY_OUTPUT="$(kubectl apply -f "$ROOT/rhoai/inferenceservice-v1beta1.yaml" 2>&1)"
+kubectl apply -k "$ROOT/rhoai" 2>&1 || true
+set -e
+
+echo "Waiting for KServe CRD to become established..."
+kubectl wait --for=condition=Established crd/inferenceservices.serving.kserve.io --timeout=120s
+
+set +e
+APPLY_OUTPUT="$(kubectl apply -k "$ROOT/rhoai" 2>&1)"
 APPLY_RC=$?
 set -e
 echo "$APPLY_OUTPUT"
 
-if lab_baseline_bug_present 'serving.kserve.io/v1beta1' 'rhoai/inferenceservice-v1beta1.yaml'; then
+if lab_tier5_baseline_bug_present; then
   if [[ "$APPLY_RC" -ne 0 ]]; then
     lab_tier_expect_baseline_failure "InferenceService apiVersion serving.kserve.io/v1beta1 not served"
   fi

@@ -1,5 +1,5 @@
-# Tier 2 (KWOK): Creates 100 fake nodes for scale testing without real hardware.
-# Applied by ./lab run 2 (creates KWOK cluster if missing)
+# Auto-generated KWOK fake nodes for scale testing.
+---
 apiVersion: v1
 kind: Node
 metadata:
@@ -27,13 +27,2975 @@ status:
     pods: 110
   nodeInfo:
     architecture: amd64
-    bootID: ""
-    containerRuntimeVersion: ""
-    kernelVersion: ""
-    kubeProxyVersion: fake
-    kubeletVersion: fake
-    machineID: ""
     operatingSystem: linux
-    osImage: ""
-    systemUUID: ""
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-1
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-1
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-2
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-2
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-3
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-3
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-4
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-4
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-5
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-5
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-6
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-6
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-7
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-7
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-8
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-8
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-9
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-9
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-10
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-10
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-11
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-11
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-12
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-12
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-13
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-13
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-14
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-14
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-15
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-15
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-16
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-16
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-17
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-17
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-18
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-18
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-19
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-19
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-20
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-20
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-21
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-21
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-22
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-22
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-23
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-23
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-24
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-24
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-25
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-25
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-26
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-26
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-27
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-27
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-28
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-28
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-29
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-29
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-30
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-30
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-31
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-31
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-32
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-32
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-33
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-33
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-34
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-34
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-35
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-35
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-36
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-36
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-37
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-37
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-38
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-38
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-39
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-39
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-40
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-40
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-41
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-41
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-42
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-42
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-43
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-43
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-44
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-44
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-45
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-45
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-46
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-46
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-47
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-47
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-48
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-48
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-49
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-49
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-50
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-50
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-51
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-51
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-52
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-52
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-53
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-53
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-54
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-54
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-55
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-55
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-56
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-56
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-57
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-57
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-58
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-58
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-59
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-59
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-60
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-60
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-61
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-61
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-62
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-62
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-63
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-63
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-64
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-64
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-65
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-65
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-66
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-66
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-67
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-67
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-68
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-68
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-69
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-69
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-70
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-70
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-71
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-71
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-72
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-72
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-73
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-73
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-74
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-74
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-75
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-75
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-76
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-76
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-77
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-77
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-78
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-78
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-79
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-79
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-80
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-80
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-81
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-81
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-82
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-82
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-83
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-83
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-84
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-84
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-85
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-85
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-86
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-86
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-87
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-87
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-88
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-88
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-89
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-89
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-90
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-90
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-91
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-91
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-92
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-92
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-93
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-93
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-94
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-94
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-95
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-95
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-96
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-96
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-97
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-97
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-98
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-98
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+  phase: Running
+---
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    node.alpha.kubernetes.io/ttl: "0"
+    kwok.x-k8s.io/node: fake
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: kwok-node-99
+    kubernetes.io/os: linux
+    kwok.x-k8s.io/node: fake
+    node-role.kubernetes.io/worker: ""
+    type: kwok
+  name: kwok-node-99
+status:
+  allocatable:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  capacity:
+    cpu: 32
+    memory: 256Gi
+    pods: 110
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
   phase: Running

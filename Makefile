@@ -79,3 +79,11 @@ lab-status:
 lab-run:
 	@test -n "$(TIER)" || (echo "Usage: make lab-run TIER=1"; exit 1)
 	./lab run $(TIER)
+
+.PHONY: install-prerequisites
+install-prerequisites:
+	./scripts/install-prerequisites.sh $(PREREQ_ARGS)
+
+.PHONY: check-prerequisites
+check-prerequisites:
+	./scripts/install-prerequisites.sh --check $(PREREQ_ARGS)

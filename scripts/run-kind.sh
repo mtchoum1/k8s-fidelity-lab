@@ -73,8 +73,14 @@ done
 POD_STATUS="$(kubectl get pods -n default -l "$PIPELINE_LABEL" --no-headers 2>/dev/null | awk '{print $3}' | head -1)"
 echo "Pod status: ${POD_STATUS:-unknown} | sidecar waiting reason: ${SIDECAR_REASON:-none}"
 
-if lab_baseline_bug_present 'INTENTIONAL TIER 3 BUG' 'controllers/modelpipeline_controller.go'; then
-  if [[ "$SIDECAR_REASON" == "CrashLoopBackOff" ]] || [[ "$POD_STATUS" == *"CrashLoopBackOff"* ]] || [[ "$POD_STATUS" == *"Error"* ]]; then
+if [[ "$SIDECAR_REASON" == "ErrImagePull" || "$SIDECAR_REASON" == "ImagePullBackOff" ]]; then
+  echo "Image pull events:"
+  kubectl describe pods -n default -l "$PIPELINE_LABEL" 2>/dev/null | sed -n '/Events:/,$p' | tail -15
+  lab_tier_fail "sidecar image pull failed — re-run ./lab run 3 (kind-loaded images need imagePullPolicy: IfNotPresent on controller containers)"
+fi
+
+if ! lab_tier3_fix_applied; then
+  if [[ "$SIDECAR_REASON" == "CrashLoopBackOff" ]] || [[ "$POD_STATUS" == *"CrashLoopBackOff"* ]]; then
     lab_tier_expect_baseline_failure "metrics-sidecar CrashLoopBackOff (SIDECAR_LOG_DIR missing from pod template)"
   fi
   lab_tier_fail "Tier 3 sidecar bug not observed (pod=${POD_STATUS}, sidecar reason=${SIDECAR_REASON:-none})"

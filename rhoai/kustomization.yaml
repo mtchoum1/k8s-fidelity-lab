@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
+  - kserve-crds-lab.yaml
   - odh-subscription.yaml
   - kserve-integration.yaml
-  - kserve-crds-lab.yaml
   - inferenceservice-v1beta1.yaml

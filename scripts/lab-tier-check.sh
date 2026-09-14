@@ -11,6 +11,15 @@ lab_baseline_bug_present() {
   grep -q "$marker" "$LAB_ROOT/$file"
 }
 
+lab_tier3_fix_applied() {
+  grep -q 'Name: "SIDECAR_LOG_DIR"' "$LAB_ROOT/controllers/modelpipeline_controller.go"
+}
+
+lab_tier5_baseline_bug_present() {
+  grep -E '^\s*apiVersion:\s*serving\.kserve\.io/v1beta1\s*$' \
+    "$LAB_ROOT/rhoai/inferenceservice-v1beta1.yaml"
+}
+
 lab_tier_pass() {
   echo ""
   echo "PASS: $*"
