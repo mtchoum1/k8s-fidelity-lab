@@ -265,7 +265,10 @@ return corev1.Container{
     Env: []corev1.EnvVar{
         {Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"},
     },
-    // SecurityContext and volume unchanged until Tier 7
+    VolumeMounts: []corev1.VolumeMount{
+        {Name: "sidecar-logs", MountPath: "/var/log/sidecar"},
+    },
+    // SecurityContext and volume type (emptyDir) are Tier 7 — see Tier 7 Step 4
     ...
 }
 ```
@@ -514,7 +517,7 @@ Before you start, confirm:
 
 - [ ] **CRC** installed and **~16 GB RAM** free (quit heavy apps; on Mac, `podman machine stop` if CRC fails to start)
 - [ ] **`oc` CLI** on your PATH (`eval $(crc oc-env)` after `crc start`)
-- [ ] **Quay.io** login (default image registry) — or set `IMAGE_REGISTRY=crc` to use CRC's internal registry only
+- [ ] **GitHub Container Registry** login (default) — `gh auth login` — or set `IMAGE_REGISTRY=crc` to use CRC's internal registry only
 - [ ] **Podman or Docker** for building images
 
 
@@ -535,11 +538,13 @@ oc get nodes                 # STATUS Ready; note architecture (arm64 on M-serie
 
 ### Step 2 — Build images, push, deploy (~10 min)
 
-Images land in [quay.io/mtchoumi-aaet/lab-image](https://quay.io/repository/mtchoumi-aaet/lab-image) (`operator`, `inference-server`, `metrics-sidecar` tags).
+Images land in GitHub Container Registry (`ghcr.io/<owner>/k8s-fidelity-lab` — detected from `git origin`) with tags `operator`, `inference-server`, and `metrics-sidecar`.
 
 ```bash
-export QUAY_USERNAME=your-quay-user
-export QUAY_TOKEN=your-quay-token    # Quay → Account Settings → Generate Encrypted Password
+gh auth login
+gh auth refresh -s write:packages   # needed once for GHCR push
+export GITHUB_TOKEN=$(gh auth token)
+export GHCR_USERNAME=$(gh api user -q .login)
 
 chmod +x scripts/run-openshift.sh
 ./scripts/run-openshift.sh
@@ -549,9 +554,13 @@ chmod +x scripts/run-openshift.sh
 The script:
 
 1. Detects cluster **CPU arch** (`arm64` vs `amd64`) and builds the operator for that arch
-2. Pushes all three images to Quay (or CRC registry when `IMAGE_REGISTRY=crc`)
-3. Installs the CRD and operator in **`fidelity-lab-system`**
-4. Applies the Tier 7 `ModelInferencePipeline` sample in the same namespace
+2. Pushes all three images to GHCR (or CRC registry when `IMAGE_REGISTRY=crc`)
+3. Installs the CRD and operator in **`fidelity-lab-system`**, restarts the operator deployment
+4. **Deletes and recreates** the Tier 7 `ModelInferencePipeline` (drops stale ReplicaSets from prior runs)
+5. Validates SCC outcome:
+   - **Baseline:** newest ReplicaSet shows SCC denial → `EXPECTED on baseline`
+   - **Fixed controller:** waits for `deployment/pr104-openshift-sidecar-inference` rollout and sidecar `Ready`
+6. Stops CRC on exit (set `LAB_KEEP_CLUSTER=1` to leave it running)
 
 ```bash
 oc project fidelity-lab-system
@@ -576,6 +585,14 @@ oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar | tail -30
 # look for: unable to validate against any security context constraint
 #           hostPath volumes are not allowed
 #           runAsUser: 0 is not allowed
+
+# After a partial fix you may instead see a hardcoded UID rejection:
+#           runAsUser: Invalid value: 1001040000: must be in the ranges: [1000650000, 1000659999]
+
+# If you re-ran Tier 7 multiple times, inspect the *newest* ReplicaSet only:
+oc get rs -l fidelity.ai/pipeline=pr104-openshift-sidecar --sort-by=.metadata.creationTimestamp
+oc describe $(oc get rs -l fidelity.ai/pipeline=pr104-openshift-sidecar \
+  --sort-by=.metadata.creationTimestamp -o name | tail -1) | tail -30
 ```
 
 **Checklist — baseline should show:**
@@ -591,15 +608,64 @@ oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar | tail -30
 
 **File:** `controllers/modelpipeline_controller.go`
 
-Fix **Tier 7 (SCC)** and **Tier 3 (sidecar env)** together — after SCC passes, the sidecar still needs `SIDECAR_LOG_DIR`.
+Fix **Tier 7 (SCC)** and **Tier 3 (sidecar env)** together. On baseline, the sidecar has **three** SCC violations; you must address all of them:
+
+| # | Baseline (broken) | Fixed (passes SCC) |
+|---|-------------------|--------------------|
+| 1 | `hostPath` volume at `/var/log` | `emptyDir` volume |
+| 2 | `RunAsUser: int64Ptr(0)` (root) | `RunAsNonRoot: true` only — **do not set `RunAsUser`** |
+| 3 | No `SIDECAR_LOG_DIR` env var | `SIDECAR_LOG_DIR=/var/log/sidecar` + mount at same path |
+
+**Baseline code (from `lab-v1.0-pr104`):**
+
+```go
+// buildDeployment — volume block when sidecarLogging is true
+volumes = append(volumes, corev1.Volume{
+    Name: "sidecar-logs",
+    VolumeSource: corev1.VolumeSource{
+        HostPath: &corev1.HostPathVolumeSource{
+            Path: "/var/log",
+            Type: hostPathPtr(corev1.HostPathDirectory),
+        },
+    },
+})
+
+// buildSidecarContainer
+return corev1.Container{
+    Name:    "metrics-sidecar",
+    Image:   image,
+    Command: []string{"/usr/local/bin/sidecar-entrypoint.sh"},
+    SecurityContext: &corev1.SecurityContext{
+        RunAsUser: int64Ptr(0),
+    },
+    VolumeMounts: []corev1.VolumeMount{
+        {Name: "sidecar-logs", MountPath: "/var/log"},
+    },
+    ...
+}
+```
+
+**Working fix — apply all three changes:**
 
 **4a — Sidecar security context** in `buildSidecarContainer` (drop root UID):
 
 ```go
 SecurityContext: &corev1.SecurityContext{
     RunAsNonRoot: boolPtr(true),
-    RunAsUser:    int64Ptr(1001040000),
+    // Do not set RunAsUser — OpenShift restricted-v2 assigns a UID from the namespace range.
 },
+```
+
+**Do not hardcode a UID.** A value like `1001040000` will still fail SCC if it falls outside your namespace range:
+
+```text
+runAsUser: Invalid value: 1001040000: must be in the ranges: [1000650000, 1000659999]
+```
+
+Check your namespace range with:
+
+```bash
+oc describe namespace fidelity-lab-system | grep sa.scc.uid-range
 ```
 
 **4b — Replace `hostPath` with `emptyDir`** in `buildDeployment`:
@@ -615,8 +681,6 @@ volumes = append(volumes, corev1.Volume{
 
 **4c — Align env var and mount** in `buildSidecarContainer` (Tier 3 + Tier 7):
 
-If you fixed Tier 3 with `SIDECAR_LOG_DIR=/var/log/sidecar` but left the volume mount at `/var/log`, that can still pass on kind — the subdirectory is created under the mounted path. For Tier 7, the mount path must match the env var. Align both:
-
 ```go
 Env: []corev1.EnvVar{
     {Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"},
@@ -626,22 +690,72 @@ VolumeMounts: []corev1.VolumeMount{
 },
 ```
 
+**Complete working `buildSidecarContainer` after all fixes:**
+
+```go
+func (r *ModelInferencePipelineReconciler) buildSidecarContainer(pipeline *fidelityv1alpha1.ModelInferencePipeline) corev1.Container {
+    image := pipeline.Spec.SidecarImage
+    if image == "" {
+        image = defaultSidecarImage
+    }
+
+    return corev1.Container{
+        Name:            "metrics-sidecar",
+        Image:           image,
+        ImagePullPolicy: corev1.PullIfNotPresent,
+        Command:         []string{"/usr/local/bin/sidecar-entrypoint.sh"},
+        Env: []corev1.EnvVar{
+            {Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"},
+        },
+        VolumeMounts: []corev1.VolumeMount{
+            {Name: "sidecar-logs", MountPath: "/var/log/sidecar"},
+        },
+        SecurityContext: &corev1.SecurityContext{
+            RunAsNonRoot: boolPtr(true),
+        },
+        Ports: []corev1.ContainerPort{
+            {Name: "metrics", ContainerPort: 9090},
+        },
+    }
+}
+```
+
+Leaving `INTENTIONAL TIER 7 BUG` comments in the file is fine — `./lab run 7` detects fixes from **actual code** (`emptyDir`, no `int64Ptr(0)`, no hardcoded `RunAsUser`), not from comment text.
+
 
 
 ### Step 5 — Rebuild and verify (~5 min)
 
-Re-run the deploy script so the cluster picks up your fixed operator image:
+Re-run the deploy script so the cluster picks up your fixed operator image. The script rebuilds/pushes images, rolls out the operator, and recreates the pipeline from scratch:
 
 ```bash
-./scripts/run-openshift.sh
+./lab run 7
+# or: ./scripts/run-openshift.sh
+```
 
+**Expected PASS output:**
+
+```text
+Tier 7 fix detected in controller — expect SCC-compliant sidecar pod
+Waiting for inference deployment rollout...
+deployment "pr104-openshift-sidecar-inference" successfully rolled out
+
+PASS: OpenShift pipeline running with SCC-compliant sidecar
+```
+
+Manual checks:
+
+```bash
 oc project fidelity-lab-system
 oc rollout status deployment/pr104-openshift-sidecar-inference --timeout=180s
 oc get pods -l fidelity.ai/pipeline=pr104-openshift-sidecar
 # expect 2/2 Running (inference + metrics-sidecar)
 
+oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar | tail -20
+# newest RS should show EmptyDir volume, no SCC FailedCreate events
+
 oc logs -l fidelity.ai/pipeline=pr104-openshift-sidecar -c metrics-sidecar --tail=20
-# no "SIDECAR_LOG_DIR is required" errors
+# expect: sidecar starting; writing metrics to /var/log/sidecar/inference-metrics.log
 ```
 
 
@@ -658,20 +772,38 @@ oc logs -l fidelity.ai/pipeline=pr104-openshift-sidecar -c metrics-sidecar --tai
 | `No resources found` on `oc describe pod` | Wrong namespace — `oc project fidelity-lab-system`; or SCC blocked pod creation (check `oc describe rs` instead) |
 | `No resources found` after you expected a pod | Baseline behavior — SCC failure appears on the **ReplicaSet**, not always as a Pod |
 | Operator `CrashLoopBackOff` / `lfstack.push` on CRC Mac | Wrong image arch — script auto-detects `arm64`; re-run `./scripts/run-openshift.sh` |
-| Inference `ImagePullBackOff` on `ghcr.io` (403) | CRC cannot pull ghcr.io — use Quay via `./scripts/run-openshift.sh` |
-| `unauthorized` on Quay push | Export `QUAY_USERNAME` + `QUAY_TOKEN`, then `podman login quay.io` |
+| Inference `ImagePullBackOff` on external registry | Ensure GHCR package is public or pull secret exists — re-run `./lab run 7` |
+| `unauthorized` on GHCR push | Run `gh auth login`; `gh auth refresh -s write:packages`; export `GITHUB_TOKEN` and `GHCR_USERNAME` |
 | Sidecar `CrashLoopBackOff` after SCC fix | Tier 3 bug — add `SIDECAR_LOG_DIR` and mount `/var/log/sidecar` (Step 4c) |
-| `oc apply` sample only after fix | Operator image is stale — always `./scripts/run-openshift.sh` to rebuild and roll out |
+| `runAsUser: Invalid value: 1001040000` after emptyDir fix | Hardcoded UID outside namespace range — use `RunAsNonRoot: true` only; omit `RunAsUser` (Step 4a) |
+| `EXPECTED on baseline` after you applied fixes | Partial fix only (e.g. emptyDir but still `int64Ptr(0)`), or stale operator image — re-run `./lab run 7` end-to-end |
+| Stale SCC errors mention `hostPath` / `runAsUser: 0` | Old ReplicaSet from a prior run — `./lab run 7` deletes and recreates the pipeline; check **newest** RS only |
+| `oc apply` sample only after fix | Operator image is stale — always `./lab run 7` to rebuild, push, and roll out |
+| `inference deployment did not become ready` | Check newest RS with `oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar` — SCC message tells you which field is still wrong |
 
 
 
 ### Symptoms (quick reference)
 
+**Baseline (expected failure):**
+
 ```
 unable to validate against any security context constraint
-CreateContainerConfigError
 hostPath volumes are not allowed
 runAsUser: 0 is not allowed
+```
+
+**Partial fix (hardcoded UID still wrong):**
+
+```
+runAsUser: Invalid value: 1001040000: must be in the ranges: [1000650000, 1000659999]
+```
+
+**After full fix (expected success):**
+
+```
+deployment "pr104-openshift-sidecar-inference" successfully rolled out
+PASS: OpenShift pipeline running with SCC-compliant sidecar
 ```
 
 ---

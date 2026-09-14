@@ -3,7 +3,7 @@
 set -euo pipefail
 
 NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
-LOCAL_PORT="${ARGOCD_UI_PORT:-8080}"
+LOCAL_PORT="${ARGOCD_UI_PORT:-9090}"
 USERNAME="admin"
 
 if ! kubectl -n "$NAMESPACE" get deployment argocd-server &>/dev/null; then
@@ -16,6 +16,8 @@ if ! kubectl -n "$NAMESPACE" get configmap argocd-cmd-params-cm -o jsonpath='{.d
   echo "Enabling server.insecure (HTTP UI for local port-forward)..."
   kubectl -n "$NAMESPACE" patch configmap argocd-cmd-params-cm --type merge \
     -p '{"data":{"server.insecure":"true"}}'
+  kubectl -n "$NAMESPACE" patch configmap argocd-cm --type merge \
+    -p "{\"data\":{\"url\":\"http://127.0.0.1:${LOCAL_PORT}\"}}"
   kubectl -n "$NAMESPACE" rollout restart deployment/argocd-server
   kubectl -n "$NAMESPACE" rollout status deployment/argocd-server --timeout=120s
 fi
@@ -39,7 +41,7 @@ echo ""
 echo "=== ArgoCD web UI ==="
 echo "  1. In another terminal (or background), run:"
 echo "       kubectl port-forward svc/argocd-server -n ${NAMESPACE} ${LOCAL_PORT}:80"
-echo "  2. Open:  http://localhost:${LOCAL_PORT}"
+echo "  2. Open:  http://127.0.0.1:${LOCAL_PORT}   (http, not https)"
 echo "  3. Username:  ${USERNAME}   (not adminuser)"
 echo "  4. Password:  ${PASSWORD}${CLIP}"
 echo ""

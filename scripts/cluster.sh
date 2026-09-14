@@ -55,6 +55,30 @@ _lab_cluster_cleanup_kwok() {
   delete_kwok_cluster "${LAB_CLUSTER_NAME:-fidelity-kwok}"
 }
 
+stop_crc_cluster() {
+  if lab_cluster_keep_enabled; then
+    echo "LAB_KEEP_CLUSTER set — leaving CRC running"
+    return 0
+  fi
+
+  if ! command -v crc &>/dev/null; then
+    return 0
+  fi
+
+  local status
+  status="$(crc status 2>/dev/null || true)"
+  if grep -qi "Running" <<<"$status"; then
+    echo "Stopping CRC..."
+    crc stop
+  fi
+}
+
+_lab_cluster_cleanup_crc() {
+  [[ "${_LAB_CLUSTER_CLEANUP_DONE}" == 1 ]] && return 0
+  _LAB_CLUSTER_CLEANUP_DONE=1
+  stop_crc_cluster
+}
+
 register_lab_kind_cleanup() {
   LAB_CLUSTER_NAME="${1:-fidelity-kind}"
   trap '_lab_cluster_cleanup_kind' EXIT INT TERM
@@ -63,6 +87,10 @@ register_lab_kind_cleanup() {
 register_lab_kwok_cleanup() {
   LAB_CLUSTER_NAME="${1:-fidelity-kwok}"
   trap '_lab_cluster_cleanup_kwok' EXIT INT TERM
+}
+
+register_lab_crc_cleanup() {
+  trap '_lab_cluster_cleanup_crc' EXIT INT TERM
 }
 
 ensure_podman_machine() {

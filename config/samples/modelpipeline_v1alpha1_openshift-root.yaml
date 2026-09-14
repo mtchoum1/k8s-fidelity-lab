@@ -7,8 +7,8 @@ metadata:
 spec:
   modelName: sklearn-iris
   replicas: 1
-  # Use Quay images built by ./scripts/run-openshift.sh (ghcr.io is 403 on CRC).
-  image: quay.io/mtchoumi-aaet/lab-image:inference-server
+  # Use GHCR images built by ./scripts/run-openshift.sh (auto-detects ghcr.io/OWNER/REPO from git origin).
+  image: ghcr.io/<owner>/k8s-fidelity-lab:inference-server
   gpuMemoryRequirement: "16Gi"
   sidecarLogging: true
-  sidecarImage: quay.io/mtchoumi-aaet/lab-image:metrics-sidecar
+  sidecarImage: ghcr.io/<owner>/k8s-fidelity-lab:metrics-sidecar

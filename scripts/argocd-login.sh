@@ -33,11 +33,12 @@ for _ in $(seq 1 20); do
 done
 
 echo "Logging in as ${USERNAME}..."
-argocd login "localhost:${LOCAL_PORT}" \
+argocd login "127.0.0.1:${LOCAL_PORT}" \
   --username "$USERNAME" \
   --password "$PASSWORD" \
-  --insecure \
-  --grpc-web
+  --plaintext \
+  --grpc-web \
+  --skip-test-tls
 
 echo ""
 echo "Logged in. Examples:"
