@@ -7,6 +7,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/scripts/lab-metrics.sh"
 # shellcheck source=scripts/cluster.sh
 source "$ROOT/scripts/cluster.sh"
+# shellcheck source=scripts/lab-tier-check.sh
+source "$ROOT/scripts/lab-tier-check.sh"
 
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
@@ -16,12 +18,29 @@ echo "=== Tier 6: GitOps / Kustomize + ArgoCD ==="
 
 ensure_kind_cluster "$CLUSTER_NAME" "$ROOT/config/kind-config.yaml"
 
+lab_metrics_handoff "kustomize build check"
+
 echo ""
-echo "Expect kustomize build to FAIL on the broken baseline:"
-if kubectl kustomize "$ROOT/config/overlays/pr104"; then
-  echo "ERROR: overlay built successfully — Tier 6 bug may already be fixed."
-  exit 1
+echo "Checking kustomize overlay..."
+set +e
+KUSTOMIZE_OUTPUT="$(kubectl kustomize "$ROOT/config/overlays/pr104" 2>&1)"
+KUSTOMIZE_RC=$?
+set -e
+
+if lab_baseline_bug_present 'sidecarLoging' 'config/overlays/pr104/sidecar-patch.yaml'; then
+  if [[ "$KUSTOMIZE_RC" -eq 0 ]]; then
+    lab_tier_fail "kustomize build succeeded on baseline — patch typo may already be fixed"
+  fi
+  echo "$KUSTOMIZE_OUTPUT"
+  lab_tier_expect_baseline_failure "kustomize build fails on malformed sidecarLogging patch path"
 fi
+
+if [[ "$KUSTOMIZE_RC" -ne 0 ]]; then
+  echo "$KUSTOMIZE_OUTPUT"
+  lab_tier_fail "kustomize build still fails after fix — correct sidecarLoging → sidecarLogging in sidecar-patch.yaml"
+fi
+
+echo "kustomize build succeeded."
 
 echo ""
 echo "Installing ArgoCD in namespace ${ARGOCD_NAMESPACE}..."
@@ -32,16 +51,6 @@ kubectl apply -n "$ARGOCD_NAMESPACE" -f \
 echo "Waiting for ArgoCD server..."
 kubectl -n "$ARGOCD_NAMESPACE" wait --for=condition=Available deployment/argocd-server --timeout=300s
 
-lab_metrics_handoff "ArgoCD installed; connect repo and verify sync failure"
-
 echo ""
-echo "Next steps (run in another terminal while this script waits):"
-echo "  ./scripts/argocd-connect-github.sh   # auto-detects origin + current branch"
-echo "  ./scripts/argocd-login.sh"
-echo "  ./scripts/argocd-ui-access.sh"
-echo ""
-if [[ -t 0 ]]; then
-  read -r -p "Press Enter when ArgoCD exploration is complete (deletes kind cluster unless LAB_KEEP_CLUSTER=1)... "
-else
-  echo "Non-interactive shell — deleting kind cluster on exit (set LAB_KEEP_CLUSTER=1 to keep)."
-fi
+echo "Next: ./scripts/argocd-connect-github.sh  (then verify sync in UI/CLI)"
+lab_tier_pass "kustomize overlay builds and ArgoCD is installed"

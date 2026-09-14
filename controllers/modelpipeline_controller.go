@@ -218,6 +218,10 @@ func (r *ModelInferencePipelineReconciler) waitForPodStatuses(ctx context.Contex
 		return err
 	}
 
+	if len(podList.Items) == 0 {
+		return fmt.Errorf("no pods scheduled yet for deployment %s", deployName)
+	}
+
 	// Sequential poll: each pod must be Running before the next is checked.
 	for _, item := range podList.Items {
 		podName := types.NamespacedName{Name: item.Name, Namespace: item.Namespace}

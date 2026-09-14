@@ -209,7 +209,7 @@ PIPELINE_COUNT=20 ./scripts/run-kwok.sh   # short demo
 ./lab run 2                               # full 100 × 5 load
 ```
 
-After the fix, you should see `Pipeline status: N/N Running` and steady local operator logs (no `waiting on pod status updates` spam).
+`./lab run 2` exits automatically after ~90s of observation (no Ctrl+C). On the **broken baseline** it **fails** with an EXPECTED message when reconcile starvation is observed. After the fix it **passes** when all pipelines reach Running with no requeue spam.
 
 ### Common mistakes
 

@@ -7,6 +7,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/scripts/lab-metrics.sh"
 # shellcheck source=scripts/cluster.sh
 source "$ROOT/scripts/cluster.sh"
+# shellcheck source=scripts/lab-tier-check.sh
+source "$ROOT/scripts/lab-tier-check.sh"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
 SIDECAR_IMG="ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest"
@@ -184,13 +186,37 @@ echo "Images:"
 echo "  operator:         ${OPERATOR_REF}"
 echo "  inference-server: ${INFERENCE_REF}"
 echo "  metrics-sidecar:  ${SIDECAR_REF}"
-lab_metrics_handoff "cluster deploy complete; verify SCC failure manually"
+lab_metrics_handoff "checking OpenShift SCC enforcement"
 
-echo ""
-echo "All Tier 7 resources are in namespace: ${LAB_NAMESPACE}"
-echo "  oc project ${LAB_NAMESPACE}"
-echo ""
-echo "Verify Tier 7 SCC failure (pods may not appear — check deployment/replicaset):"
-echo "  oc project ${LAB_NAMESPACE}"
-echo "  oc get deployment pr104-openshift-sidecar-inference"
-echo "  oc describe rs -l fidelity.ai/pipeline=pr104-openshift-sidecar | tail -20"
+echo "Waiting for deployment/replicaset events (up to 60s)..."
+PIPELINE_LABEL="fidelity.ai/pipeline=pr104-openshift-sidecar"
+SCC_DENIED=""
+for _ in $(seq 1 30); do
+  SCC_DENIED="$(oc describe rs -n "$LAB_NAMESPACE" -l "$PIPELINE_LABEL" 2>/dev/null | grep -i 'unable to validate against any security context constraint' | head -1 || true)"
+  if [[ -n "$SCC_DENIED" ]]; then
+    break
+  fi
+  if oc get pods -n "$LAB_NAMESPACE" -l "$PIPELINE_LABEL" --no-headers 2>/dev/null | grep -q "Running"; then
+    break
+  fi
+  sleep 2
+done
+
+if lab_baseline_bug_present 'INTENTIONAL TIER 7 BUG' 'controllers/modelpipeline_controller.go'; then
+  if [[ -n "$SCC_DENIED" ]]; then
+    echo "$SCC_DENIED"
+    lab_tier_expect_baseline_failure "OpenShift SCC denies root sidecar mounting /var/log"
+  fi
+  echo "Recent replicaset events:"
+  oc describe rs -n "$LAB_NAMESPACE" -l "$PIPELINE_LABEL" 2>/dev/null | tail -20 || true
+  lab_tier_fail "Tier 7 SCC denial not observed — sidecar may still run as root on /var/log"
+fi
+
+READY="$(oc get pods -n "$LAB_NAMESPACE" -l "$PIPELINE_LABEL" -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="metrics-sidecar")].ready}' 2>/dev/null || true)"
+if [[ "$READY" != "true" ]]; then
+  echo "Sidecar logs:"
+  oc logs -n "$LAB_NAMESPACE" -l "$PIPELINE_LABEL" -c metrics-sidecar --tail=20 2>/dev/null || true
+  lab_tier_fail "metrics-sidecar not ready after SCC fix — also verify Tier 3 SIDECAR_LOG_DIR"
+fi
+
+lab_tier_pass "OpenShift pipeline running with SCC-compliant sidecar"

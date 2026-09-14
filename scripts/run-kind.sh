@@ -7,11 +7,14 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/scripts/lab-metrics.sh"
 # shellcheck source=scripts/cluster.sh
 source "$ROOT/scripts/cluster.sh"
+# shellcheck source=scripts/lab-tier-check.sh
+source "$ROOT/scripts/lab-tier-check.sh"
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 register_lab_kind_cleanup "$CLUSTER_NAME"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
 SIDECAR_IMG="ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest"
+PIPELINE_LABEL="fidelity.ai/pipeline=pr104-sidecar-broken"
 
 echo "=== Tier 3: kind (real Kubelets + Podman container runtime) ==="
 
@@ -37,24 +40,50 @@ kubectl apply -f "$ROOT/config/operator/"
 echo "Waiting for operator to be ready..."
 kubectl -n fidelity-lab-system rollout status deployment/fidelity-lab-operator --timeout=120s
 
-echo "Applying PR #104 sample with broken sidecar env (expect CrashLoopBackOff)..."
+echo "Applying PR #104 sample with broken sidecar env (expect CrashLoopBackOff on baseline)..."
 kubectl apply -f "$ROOT/config/samples/modelpipeline_v1alpha1_kind-broken.yaml"
 
-echo "Waiting for operator to create inference pod (up to 120s)..."
+lab_metrics_handoff "waiting for inference pod and sidecar state"
+
+echo "Waiting for inference pod (up to 120s)..."
 for _ in $(seq 1 60); do
-  if kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken --no-headers 2>/dev/null | grep -q .; then
+  if kubectl get pods -n default -l "$PIPELINE_LABEL" --no-headers 2>/dev/null | grep -q .; then
     break
   fi
   sleep 2
 done
 
-if ! kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken --no-headers 2>/dev/null | grep -q .; then
-  echo "No inference pod yet. Check operator logs:"
+if ! kubectl get pods -n default -l "$PIPELINE_LABEL" --no-headers 2>/dev/null | grep -q .; then
+  echo "No inference pod yet. Operator logs:"
   kubectl -n fidelity-lab-system logs -l app=fidelity-lab-operator --tail=30
-  exit 1
+  lab_tier_fail "inference pod was not created"
 fi
 
-lab_metrics_handoff "interactive pod watch"
+echo "Waiting for sidecar container state (up to 120s)..."
+SIDECAR_REASON=""
+for _ in $(seq 1 60); do
+  SIDECAR_REASON="$(kubectl get pods -n default -l "$PIPELINE_LABEL" -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="metrics-sidecar")].state.waiting.reason}' 2>/dev/null || true)"
+  SIDECAR_READY="$(kubectl get pods -n default -l "$PIPELINE_LABEL" -o jsonpath='{.items[0].status.containerStatuses[?(@.name=="metrics-sidecar")].ready}' 2>/dev/null || true)"
+  if [[ -n "$SIDECAR_REASON" ]] || [[ "$SIDECAR_READY" == "true" ]]; then
+    break
+  fi
+  sleep 2
+done
 
-echo "Inference pod status (Ctrl+C to stop watching):"
-kubectl get pods -n default -l fidelity.ai/pipeline=pr104-sidecar-broken -w
+POD_STATUS="$(kubectl get pods -n default -l "$PIPELINE_LABEL" --no-headers 2>/dev/null | awk '{print $3}' | head -1)"
+echo "Pod status: ${POD_STATUS:-unknown} | sidecar waiting reason: ${SIDECAR_REASON:-none}"
+
+if lab_baseline_bug_present 'INTENTIONAL TIER 3 BUG' 'controllers/modelpipeline_controller.go'; then
+  if [[ "$SIDECAR_REASON" == "CrashLoopBackOff" ]] || [[ "$POD_STATUS" == *"CrashLoopBackOff"* ]] || [[ "$POD_STATUS" == *"Error"* ]]; then
+    lab_tier_expect_baseline_failure "metrics-sidecar CrashLoopBackOff (SIDECAR_LOG_DIR missing from pod template)"
+  fi
+  lab_tier_fail "Tier 3 sidecar bug not observed (pod=${POD_STATUS}, sidecar reason=${SIDECAR_REASON:-none})"
+fi
+
+if [[ "$SIDECAR_READY" != "true" ]]; then
+  echo "Sidecar logs:"
+  kubectl logs -n default -l "$PIPELINE_LABEL" -c metrics-sidecar --tail=20 2>/dev/null || true
+  lab_tier_fail "metrics-sidecar is not ready — add SIDECAR_LOG_DIR and mount /var/log/sidecar"
+fi
+
+lab_tier_pass "inference pod 2/2 Running with healthy metrics-sidecar"
