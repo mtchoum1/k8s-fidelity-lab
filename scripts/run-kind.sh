@@ -5,24 +5,20 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=scripts/lab-metrics.sh
 source "$ROOT/scripts/lab-metrics.sh"
+# shellcheck source=scripts/cluster.sh
+source "$ROOT/scripts/cluster.sh"
 CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
 SIDECAR_IMG="ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest"
 
+echo "=== Tier 3: kind (real Kubelets + Podman container runtime) ==="
+
+ensure_kind_cluster "$CLUSTER_NAME" "$ROOT/config/kind-config.yaml"
+
 # shellcheck source=scripts/container.sh
 source "$ROOT/scripts/container.sh"
 setup_podman_env
-
-echo "=== Tier 3: kind (real Kubelets + Podman container runtime) ==="
-
-if ! command -v kind &>/dev/null; then
-  echo "kind not found. Install: https://kind.sigs.k8s.io/docs/user/quick-start/"
-  exit 1
-fi
-
-kind create cluster --name "$CLUSTER_NAME" --config "$ROOT/config/kind-config.yaml" --wait 5m
-kubectl cluster-info --context "kind-${CLUSTER_NAME}"
 
 echo "Building and loading images with Podman..."
 container_build -t "$OPERATOR_IMG" "$ROOT"

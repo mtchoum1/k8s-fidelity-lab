@@ -32,7 +32,7 @@ git checkout -b lab/<name> lab-v1.0-pr104
 | Requirement | Tier | Notes |
 |-------------|------|-------|
 | Go 1.22+ | 1 | envtest auto-installs via setup-envtest |
-| [KWOK](https://kwok.sigs.k8s.io/docs/user/install/) (`kwokctl`) | 2 | Learners install KWOK and run `kwokctl create cluster --name fidelity-kwok` before `./lab run 2`; `PIPELINE_COUNT=10` for dry-run |
+| [KWOK](https://kwok.sigs.k8s.io/docs/user/install/) (`kwokctl`) | 2 | `./lab run 2` creates the KWOK cluster if missing; `PIPELINE_COUNT=10` for dry-run |
 | Podman + kind | 3–4 | 8 GB RAM minimum |
 | OLM + kind | 5 | 12 GB RAM; allow 10 min install |
 | ArgoCD | 6 | Can demo with `kubectl kustomize` only |
@@ -113,7 +113,7 @@ Env: []corev1.EnvVar{{Name: "SIDECAR_LOG_DIR", Value: "/var/log/sidecar"}},
 
 ### Tier 6 — ArgoCD (~10 min)
 
-**Run:** `./lab run 6`
+**Run:** `./lab run 6` (provisions kind if needed, installs ArgoCD, then expects kustomize failure)
 
 **Expected:**
 ```bash
@@ -129,7 +129,7 @@ kubectl kustomize config/overlays/pr104
 
 ### Tier 7 — OpenShift (~30 min incl. CRC start)
 
-**Prereq:** CRC running (`crc start`), `eval $(crc oc-env)`, `oc login`. **Not kind.** All Tier 7 resources live in `fidelity-lab-system`.
+**Prereq:** CRC installed (`./lab run 7` starts it if needed). **Not kind.** All Tier 7 resources live in `fidelity-lab-system`.
 
 **Run:** `./scripts/run-openshift.sh` or `./lab run 7`
 

@@ -92,19 +92,7 @@ lab_run_tier() {
       ;;
     6)
       echo "=== Tier 6: GitOps / Kustomize ==="
-      echo "Expect kustomize build to FAIL on the broken baseline:"
-      if kubectl kustomize config/overlays/pr104; then
-        echo "ERROR: overlay built successfully — Tier 6 bug may already be fixed."
-        rc=1
-      else
-        lab_metrics_handoff "kustomize build failed as expected"
-        echo ""
-        echo "Next: install ArgoCD and connect this repo/branch:"
-        echo "  kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -"
-        echo "  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml"
-        echo "  ./scripts/argocd-connect-github.sh   # auto-detects origin + current branch"
-        echo "  ./scripts/argocd-login.sh"
-      fi
+      ./scripts/run-argocd.sh || rc=1
       ;;
     7)
       if [[ -x "$LAB_ROOT/scripts/run-openshift.sh" ]]; then

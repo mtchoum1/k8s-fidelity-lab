@@ -8,6 +8,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=scripts/lab-metrics.sh
 source "$ROOT/scripts/lab-metrics.sh"
+# shellcheck source=scripts/cluster.sh
+source "$ROOT/scripts/cluster.sh"
 CLUSTER_NAME="${KWOK_CLUSTER_NAME:-fidelity-kwok}"
 PIPELINE_COUNT="${PIPELINE_COUNT:-100}"
 MANAGER_PID=""
@@ -22,32 +24,7 @@ trap cleanup EXIT INT TERM
 
 echo "=== Tier 2: KWOK scale test (${PIPELINE_COUNT} pipelines × 5 replicas = $((PIPELINE_COUNT * 5)) pods) ==="
 
-if ! command -v kwokctl &>/dev/null; then
-  echo "kwokctl not found (Tier 2 prerequisite)."
-  echo "Install KWOK: https://kwok.sigs.k8s.io/docs/user/install/"
-  exit 1
-fi
-
-if ! kwokctl get clusters 2>/dev/null | grep -qx "$CLUSTER_NAME"; then
-  echo "KWOK cluster '${CLUSTER_NAME}' not found (Tier 2 prerequisite)."
-  echo "Create it before running this tier:"
-  echo "  kwokctl create cluster --name ${CLUSTER_NAME} --wait 5m"
-  exit 1
-fi
-
-KWOK_CONTEXT="kwok-${CLUSTER_NAME}"
-CONTEXTS="$(kubectl config get-contexts -o name 2>/dev/null || true)"
-if ! grep -qx "$KWOK_CONTEXT" <<<"$CONTEXTS"; then
-  if grep -qx "$CLUSTER_NAME" <<<"$CONTEXTS"; then
-    KWOK_CONTEXT="$CLUSTER_NAME"
-  else
-    echo "kubectl context not found for KWOK cluster '${CLUSTER_NAME}'."
-    echo "Expected: kwok-${CLUSTER_NAME} (or ${CLUSTER_NAME})"
-    echo "Run: kwokctl create cluster --name ${CLUSTER_NAME} --wait 5m"
-    exit 1
-  fi
-fi
-kubectl config use-context "$KWOK_CONTEXT"
+ensure_kwok_cluster "$CLUSTER_NAME"
 
 "$ROOT/kwok/generate-nodes.sh" "$ROOT/kwok/fake-nodes.yaml" 100
 kubectl apply -f "$ROOT/kwok/fake-nodes.yaml"

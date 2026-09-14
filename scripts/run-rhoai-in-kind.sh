@@ -5,14 +5,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=scripts/lab-metrics.sh
 source "$ROOT/scripts/lab-metrics.sh"
+# shellcheck source=scripts/cluster.sh
+source "$ROOT/scripts/cluster.sh"
+
+CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 
 echo "=== Tier 5: rhoai-in-kind (MLOps integration) ==="
 
-# Ensure kind cluster exists from Tier 3
-if ! kubectl cluster-info &>/dev/null; then
-  echo "No cluster detected. Run ./scripts/run-kind.sh first."
-  exit 1
-fi
+ensure_kubectl_cluster "$CLUSTER_NAME" "$ROOT/config/kind-config.yaml"
 
 echo "Installing OLM (required for ODH operator subscription)..."
 # Server-side apply avoids the clusterserviceversions CRD last-applied-configuration

@@ -5,6 +5,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=scripts/lab-metrics.sh
 source "$ROOT/scripts/lab-metrics.sh"
+# shellcheck source=scripts/cluster.sh
+source "$ROOT/scripts/cluster.sh"
 OPERATOR_IMG="ghcr.io/k8s-fidelity-lab/operator:latest"
 INFERENCE_IMG="ghcr.io/k8s-fidelity-lab/inference-server:latest"
 SIDECAR_IMG="ghcr.io/k8s-fidelity-lab/metrics-sidecar:latest"
@@ -20,19 +22,7 @@ setup_podman_env
 
 echo "=== Tier 7: OpenShift / CRC ==="
 
-if ! command -v oc &>/dev/null; then
-  echo "oc CLI not found. Install OpenShift CLI: https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html"
-  exit 1
-fi
-
-if ! oc whoami &>/dev/null; then
-  echo "Not logged in to OpenShift. Run:"
-  echo "  eval \$(crc oc-env)"
-  echo "  oc login -u developer -p developer https://api.crc.testing:6443"
-  exit 1
-fi
-
-echo "Cluster: $(oc whoami) @ $(oc config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+ensure_openshift_cluster
 
 detect_cluster_goarch() {
   local arch

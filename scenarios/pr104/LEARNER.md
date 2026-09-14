@@ -157,12 +157,7 @@ return base * scale.Multiplier
 
 ## Tier 2 — KWOK (40% confidence)
 
-**Prerequisite:** Install [KWOK](https://kwok.sigs.k8s.io/docs/user/install/) (`kwokctl`) and create a cluster (the lab does not install KWOK for you):
-
-```bash
-kwokctl create cluster --name fidelity-kwok --wait 5m
-kubectl config use-context kwok-fidelity-kwok   # not "fidelity-kwok" (kwokctl hint is misleading)
-```
+**Prerequisite:** Install [KWOK](https://kwok.sigs.k8s.io/docs/user/install/) (`kwokctl`). `./lab run 2` creates the `fidelity-kwok` cluster if it does not exist (cluster creation is included in setup timing).
 
 ```bash
 ./lab run 2
@@ -222,8 +217,7 @@ After the fix, you should see `Pipeline status: N/N Running` and steady local op
 | Error                                    | Cause                                                                                       |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
 | `kwokctl not found`                      | Install KWOK before Tier 2 — see prerequisite above                                         |
-| `KWOK cluster 'fidelity-kwok' not found` | Run `kwokctl create cluster --name fidelity-kwok` first; verify with `kwokctl get clusters` |
-| `context "fidelity-kwok" does not exist` | Use context `kwok-fidelity-kwok` (see prerequisite above)                                   |
+| `KWOK cluster ... context not found`     | Re-run `./lab run 2` — it creates the cluster and selects context `kwok-fidelity-kwok`      |
 | `no logs found for container "manager"`  | Old workflow — KWOK cannot run in-cluster pods; use updated `./lab run 2` (local operator)  |
 | CRs stay empty / no `Running` phase      | Operator not running locally, or stale in-cluster Deployment still applied                  |
 
@@ -295,7 +289,7 @@ kubectl logs <pod-name> -c metrics-sidecar
 
 ## Tier 4 — Tilt (65% confidence, velocity)
 
-**Prerequisite:** Tier 3 kind cluster running (`kubectl config current-context` → `kind-fidelity-kind`), [Tilt](https://docs.tilt.dev/install.html) installed, Podman running (`podman machine start` on macOS). Use `./scripts/tilt-up.sh` — not bare `tilt up` (sets Podman socket + `DOCKER_BUILDKIT=0`).
+**Prerequisite:** [Tilt](https://docs.tilt.dev/install.html) installed. `./lab run 4` ensures the kind cluster exists (reuses Tier 3 cluster when present), starts Podman if needed, and runs `./scripts/tilt-up.sh` — not bare `tilt up` (sets Podman socket + `DOCKER_BUILDKIT=0`). Operator/images from Tier 3 are still required for a working hot-reload loop.
 
 ```bash
 ./lab run 4
@@ -445,12 +439,9 @@ error: testing value /spec/sidecarLoging failed: test failed
 kubectl kustomize config/overlays/pr104   # should succeed
 ```
 
-**Step 2 — Install ArgoCD and apply the Application:**
+**Step 2 — Connect ArgoCD to your branch** (`./lab run 6` already provisions kind and installs ArgoCD):
 
 ```bash
-kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-kubectl wait --for=condition=Available deployment/argocd-server -n argocd --timeout=300s
 ./scripts/argocd-connect-github.sh   # uses git origin + current branch (lab/mtchoumi, etc.)
 ```
 
@@ -530,7 +521,7 @@ Before you start, confirm:
 
 ### Step 1 — Start OpenShift Local (~10 min)
 
-Use the terminal — not Podman Desktop's Start button (that often yields `provider does not have any connection to start`).
+`./lab run 7` starts CRC and logs in as `developer` if the cluster is not already running. For manual setup (or if auto-start fails), use the terminal — not Podman Desktop's Start button:
 
 ```bash
 podman machine stop          # optional; frees vfkit RAM on Apple Silicon Macs

@@ -5,14 +5,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=scripts/lab-metrics.sh
 source "$ROOT/scripts/lab-metrics.sh"
+# shellcheck source=scripts/cluster.sh
+source "$ROOT/scripts/cluster.sh"
 # shellcheck source=scripts/container.sh
 source "$ROOT/scripts/container.sh"
 
-if command -v podman &>/dev/null && podman machine list &>/dev/null 2>&1; then
-  podman machine start 2>/dev/null || true
-fi
+CLUSTER_NAME="${KIND_CLUSTER_NAME:-fidelity-kind}"
 
+ensure_podman_machine
 setup_podman_env
+ensure_kind_cluster "$CLUSTER_NAME" "$ROOT/config/kind-config.yaml"
 
 # Podman's docker-compatible API does not support BuildKit's gRPC session endpoint.
 # Without this, Tilt fails with: "failed to dial gRPC: unable to upgrade to h2c, received 404"

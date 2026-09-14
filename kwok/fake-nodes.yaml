@@ -1,5 +1,5 @@
 # Tier 2 (KWOK): Creates 100 fake nodes for scale testing without real hardware.
-# Apply after: kwokctl create cluster --name fidelity-kwok
+# Applied by ./lab run 2 (creates KWOK cluster if missing)
 apiVersion: v1
 kind: Node
 metadata:
