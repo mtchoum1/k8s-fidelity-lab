@@ -72,21 +72,23 @@ Keep `main` / `lab-v1.0-pr104` frozen. Commit fixes only on your `lab/*` branch.
 
 **Observe:**
 
-- [ ] Which test passes? Which test documents the schema rejection?
-- [ ] What happens when `gpuMemoryRequirement` is `"8Gi"` (not in the scale map)?
+- [ ] Which tests fail on the baseline? Read the failure messages.
+- [ ] After fixing, does `./lab run 1` pass all 3 specs?
 
 
 
 ### Symptoms
 
-- CRs without `gpuMemoryRequirement` are rejected at admission
-- Controller panics on unknown GPU tiers (e.g. `"8Gi"`)
+On the broken baseline, `./lab run 1` **fails** with 2 failing specs:
+
+- CRs without `gpuMemoryRequirement` are rejected at admission (schema bug)
+- Controller panics on unknown GPU tiers (e.g. `"8Gi"`) (nil-pointer bug)
 
 
 
 ### Fix steps
 
-**Files:** `api/v1alpha1/modelpipeline_types.go`, `controllers/modelpipeline_controller.go`, `controllers/modelpipeline_controller_test.go`, `config/crd/bases/` (via `make manifests`)
+**Files:** `api/v1alpha1/modelpipeline_types.go`, `controllers/modelpipeline_controller.go`, `config/crd/bases/` (via `make manifests`)
 
 **Step 1 — Fix the Go type** (`api/v1alpha1/modelpipeline_types.go`):
 
@@ -134,27 +136,7 @@ if scale == nil {
 return base * scale.Multiplier
 ```
 
-**Step 4 — Update tests** (`controllers/modelpipeline_controller_test.go`) — **required, easy to miss**:
-
-After Steps 1–3, the old tests still expect the *broken* behavior and will fail. You must invert them:
-
-
-| Test                           | Change from                      | Change to                           |
-| ------------------------------ | -------------------------------- | ----------------------------------- |
-| Missing `gpuMemoryRequirement` | `Expect(err).To(HaveOccurred())` | `Expect(err).NotTo(HaveOccurred())` |
-| `gpuMemoryRequirement: "8Gi"`  | `Expect(...).To(Panic())`        | `Expect(...).NotTo(Panic())`        |
-
-
-If you skip this step you will see:
-
-```
-Expected an error to have occurred.  Got: <nil>
-Expected func() to panic
-```
-
-That means your **fix worked** — the tests just need updating.
-
-**Verify:** `./lab run 1` — expect 3 specs PASS.
+**Verify:** `./lab run 1` — expect 3 specs PASS after Steps 1–3.
 
 ### Common mistakes
 
@@ -164,7 +146,8 @@ That means your **fix worked** — the tests just need updating.
 | `make manifests` fails                             | Use `make manifests` (not `make manifest`); Makefile auto-installs `controller-gen`                                                                 |
 | CRD still requires field                           | Missing `,omitempty` — re-run `make manifests`                                                                                                      |
 | `grep` still shows `gpuMemoryRequirement` required | Wrong CRD file, or `_modelinferencepipelines.yaml` created — fix `+groupName` in `groupversion_info.go`, delete stray file, re-run `make manifests` |
-| `Expected an error to have occurred`               | CRD fixed but test not updated (Step 4)                                                                                                             |
+| `Expected an error not to have occurred`           | CRD still requires `gpuMemoryRequirement` — re-run `make manifests` and confirm `+optional` / `,omitempty`                                            |
+| `Expected func() not to panic`                     | Nil-pointer guard missing in `computeReplicas` / scale map                                                                                          |
 | Tests pass but cluster rejects CR                  | CRD not applied: `kubectl apply -f config/crd/bases/`                                                                                               |
 
 

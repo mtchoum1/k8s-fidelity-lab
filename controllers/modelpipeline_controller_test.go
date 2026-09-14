@@ -50,7 +50,7 @@ var _ = Describe("PR #104 ModelInferencePipeline Controller", func() {
 			Expect(created.Spec.SidecarLogging).To(BeTrue())
 		})
 
-		It("Should reject CRs missing gpuMemoryRequirement (Tier 1 — missing +optional)", func() {
+		It("Should accept CRs missing gpuMemoryRequirement (Tier 1 — +optional)", func() {
 			ctx := context.Background()
 
 			// Use unstructured so gpuMemoryRequirement is absent from JSON (Go client would send "").
@@ -70,12 +70,12 @@ var _ = Describe("PR #104 ModelInferencePipeline Controller", func() {
 			}
 
 			err := k8sClient.Create(ctx, pipeline)
-			Expect(err).To(HaveOccurred())
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
 	Context("Tier 1 — controller nil-pointer guard", func() {
-		It("Should panic when gpuMemoryRequirement is not in the scale map", func() {
+		It("Should not panic when gpuMemoryRequirement is not in the scale map", func() {
 			reconciler := &ModelInferencePipelineReconciler{}
 			pipeline := &fidelityv1alpha1.ModelInferencePipeline{
 				Spec: fidelityv1alpha1.ModelInferencePipelineSpec{
@@ -89,7 +89,7 @@ var _ = Describe("PR #104 ModelInferencePipeline Controller", func() {
 
 			Expect(func() {
 				reconciler.buildDeployment(pipeline)
-			}).To(Panic())
+			}).NotTo(Panic())
 		})
 	})
 })

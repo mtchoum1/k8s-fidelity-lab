@@ -46,9 +46,10 @@ git checkout -b lab/<name> lab-v1.0-pr104
 
 | Check | Expected on baseline |
 |-------|---------------------|
-| `go test ./controllers/...` | 3 specs PASS (tests *document* bugs) |
-| Missing `gpuMemoryRequirement` | Admission rejection |
-| `gpuMemoryRequirement: "8Gi"` | Panic in `buildDeployment` |
+| `./lab run 1` | **FAIL** — 2 specs fail (schema + nil-pointer) |
+| Missing `gpuMemoryRequirement` | Test expects acceptance; CRD rejects (bug) |
+| `gpuMemoryRequirement: "8Gi"` | Test expects no panic; controller panics (bug) |
+| After Tier 1 fix | `./lab run 1` — 3 specs PASS |
 
 **Talking point:** Unit tests catch schema and nil-pointer logic; they do not run containers.
 

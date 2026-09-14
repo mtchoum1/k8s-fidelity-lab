@@ -27,7 +27,7 @@ pass() {
 
 log "=== lab-verify: checking PR #104 baseline integrity ==="
 
-# --- Tier 1: envtest documents schema + nil-pointer bugs ---
+# --- Tier 1: envtest must fail until schema + nil-pointer bugs are fixed ---
 if [[ -z "${KUBEBUILDER_ASSETS:-}" ]]; then
   SETUP_ENVTEST="$(go env GOPATH)/bin/setup-envtest"
   if [[ -x "$SETUP_ENVTEST" ]]; then
@@ -36,8 +36,10 @@ if [[ -z "${KUBEBUILDER_ASSETS:-}" ]]; then
 fi
 
 if [[ -n "${KUBEBUILDER_ASSETS:-}" ]]; then
-  go test ./controllers/... -count=1 >/dev/null 2>&1 || fail "Tier 1 envtest suite must pass on baseline"
-  pass "Tier 1 envtest suite passes"
+  if go test ./controllers/... -count=1 >/dev/null 2>&1; then
+    fail "Tier 1 envtest suite must fail on baseline (apply Tier 1 fix to pass)"
+  fi
+  pass "Tier 1 envtest suite fails (expected on baseline)"
 else
   log "  SKIP: Tier 1 envtest (install setup-envtest or set KUBEBUILDER_ASSETS)"
 fi
